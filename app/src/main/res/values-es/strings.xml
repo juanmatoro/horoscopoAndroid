@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Horóscopo</string>
+
+    <!-- Nombres del Horóscopo (Español) -->
+    <string name="horoscope_name_aries">Aries</string>
+    <string name="horoscope_name_taurus">Tauro</string>
+    <string name="horoscope_name_gemini">Géminis</string>
+    <string name="horoscope_name_cancer">Cáncer</string>
+    <string name="horoscope_name_leo">Leo</string>
+    <string name="horoscope_name_virgo">Virgo</string>
+    <string name="horoscope_name_libra">Libra</string>
+    <string name="horoscope_name_scorpio">Escorpio</string>
+    <string name="horoscope_name_sagittarius">Sagitario</string>
+    <string name="horoscope_name_capricorn">Capricornio</string>
+    <string name="horoscope_name_aquarius">Acuario</string>
+    <string name="horoscope_name_pisces">Piscis</string>
+
+    <!-- Fechas del Horóscopo (Español) -->
+    <string name="horoscope_dates_aries">21 de marzo - 19 de abril</string>
+    <string name="horoscope_dates_taurus">20 de abril - 20 de mayo</string>
+    <string name="horoscope_dates_gemini">21 de mayo - 20 de junio</string>
+    <string name="horoscope_dates_cancer">21 de junio - 22 de julio</string>
+    <string name="horoscope_dates_leo">23 de julio - 22 de agosto</string>
+    <string name="horoscope_dates_virgo">23 de agosto - 22 de septiembre</string>
+    <string name="horoscope_dates_libra">23 de septiembre - 22 de octubre</string>
+    <string name="horoscope_dates_scorpio">23 de octubre - 21 de noviembre</string>
+    <string name="horoscope_dates_sagittarius">22 de noviembre - 21 de diciembre</string>
+    <string name="horoscope_dates_capricorn">22 de diciembre - 19 de enero</string>
+    <string name="horoscope_dates_aquarius">20 de enero - 18 de febrero</string>
+    <string name="horoscope_dates_pisces">19 de febrero - 20 de marzo</string>
+</resources>

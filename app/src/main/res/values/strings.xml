@@ -1,3 +1,31 @@
 <resources>
     <string name="app_name">horoscopoAndroid</string>
+
+    <!-- Horoscope Names (English) -->
+    <string name="horoscope_name_aries">Aries</string>
+    <string name="horoscope_name_taurus">Taurus</string>
+    <string name="horoscope_name_gemini">Gemini</string>
+    <string name="horoscope_name_cancer">Cancer</string>
+    <string name="horoscope_name_leo">Leo</string>
+    <string name="horoscope_name_virgo">Virgo</string>
+    <string name="horoscope_name_libra">Libra</string>
+    <string name="horoscope_name_scorpio">Scorpio</string>
+    <string name="horoscope_name_sagittarius">Sagittarius</string>
+    <string name="horoscope_name_capricorn">Capricorn</string>
+    <string name="horoscope_name_aquarius">Aquarius</string>
+    <string name="horoscope_name_pisces">Pisces</string>
+
+    <!-- Horoscope Date Ranges (English) -->
+    <string name="horoscope_dates_aries">March 21 - April 19</string>
+    <string name="horoscope_dates_taurus">April 20 - May 20</string>
+    <string name="horoscope_dates_gemini">May 21 - June 20</string>
+    <string name="horoscope_dates_cancer">June 21 - July 22</string>
+    <string name="horoscope_dates_leo">July 23 - August 22</string>
+    <string name="horoscope_dates_virgo">August 23 - September 22</string>
+    <string name="horoscope_dates_libra">September 23 - October 22</string>
+    <string name="horoscope_dates_scorpio">October 23 - November 21</string>
+    <string name="horoscope_dates_sagittarius">November 22 - December 21</string>
+    <string name="horoscope_dates_capricorn">December 22 - January 19</string>
+    <string name="horoscope_dates_aquarius">January 20 - February 18</string>
+    <string name="horoscope_dates_pisces">February 19 - March 20</string>
 </resources>
