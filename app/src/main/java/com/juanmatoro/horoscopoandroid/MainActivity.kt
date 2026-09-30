@@ -1,15 +1,20 @@
 package com.juanmatoro.horoscopoandroid
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
+/**
+ * Pantalla principal que muestra la lista de horóscopos mediante un RecyclerView.
+ */
 class MainActivity : AppCompatActivity() {
 
-    val horoscopeList: List<Horoscope> = listOf(
+    // Lista de datos estática con los 12 signos del zodíaco
+    private val horoscopeList: List<Horoscope> = listOf(
         Horoscope("aries", R.string.horoscope_name_aries, R.string.horoscope_dates_aries, R.drawable.aries_icon),
         Horoscope("taurus", R.string.horoscope_name_taurus, R.string.horoscope_dates_taurus, R.drawable.taurus_icon),
         Horoscope("gemini", R.string.horoscope_name_gemini, R.string.horoscope_dates_gemini, R.drawable.gemini_icon),
@@ -24,25 +29,25 @@ class MainActivity : AppCompatActivity() {
         Horoscope("pisces", R.string.horoscope_name_pisces, R.string.horoscope_dates_pisces, R.drawable.pisces_icon),
     )
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        // Configuración para respetar las barras de estado y navegación del sistema (edge-to-edge)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        // --- BLOQUE DE PRUEBA DE DATOS DE HORÓSCOPO ---
-        // Para probar en Logcat, simplemente descomenta este bucle:
+        // 1. Obtener la referencia del RecyclerView definido en activity_main.xml
+        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
 
-        for (horoscope in horoscopeList) {
-            val name = getString(horoscope.name)
-            val dates = getString(horoscope.dates)
-            Log.d("HOROSCOPO_TEST", "ID: ${horoscope.id} | Nombre: $name | Fechas: $dates | Icono Res ID: ${horoscope.icon}")
-        }
+        // 2. Definir el LayoutManager (LinearLayoutManager muestra los elementos en lista vertical)
+        recyclerView.layoutManager = LinearLayoutManager(this)
 
+        // 3. Conectar el Adapter pasándole la lista de horóscopos
+        recyclerView.adapter = HoroscopeAdapter(horoscopeList)
     }
 }
