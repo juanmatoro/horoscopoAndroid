@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  RECURSOS DE TEXTO EN ESPAÑOL (LOCALIZACIÓN 'es')
+  Android selecciona automáticamente este archivo cuando el idioma del dispositivo
+  está configurado en Español ('es', 'es-ES', 'es-MX', etc.).
+-->
 <resources>
-    <string name="app_name">Horóscopo</string>
+    <!-- Nombre principal de la aplicación en español -->
+    <string name="app_name">El Horóscopo Zolthan</string>
 
-    <!-- Nombres del Horóscopo (Español) -->
+    <!-- Nombres de los signos en español -->
     <string name="horoscope_name_aries">Aries</string>
     <string name="horoscope_name_taurus">Tauro</string>
     <string name="horoscope_name_gemini">Géminis</string>
@@ -16,7 +22,7 @@
     <string name="horoscope_name_aquarius">Acuario</string>
     <string name="horoscope_name_pisces">Piscis</string>
 
-    <!-- Fechas del Horóscopo (Español) -->
+    <!-- Rangos de fechas en español -->
     <string name="horoscope_dates_aries">21 de marzo - 19 de abril</string>
     <string name="horoscope_dates_taurus">20 de abril - 20 de mayo</string>
     <string name="horoscope_dates_gemini">21 de mayo - 20 de junio</string>
@@ -29,4 +35,10 @@
     <string name="horoscope_dates_capricorn">22 de diciembre - 19 de enero</string>
     <string name="horoscope_dates_aquarius">20 de enero - 18 de febrero</string>
     <string name="horoscope_dates_pisces">19 de febrero - 20 de marzo</string>
+
+    <!-- Notas explicativas de los elementos en español -->
+    <string name="element_fire">Fuego • Apasionados, dinámicos y enérgicos</string>
+    <string name="element_earth">Tierra • Prácticos, estables y realistas</string>
+    <string name="element_air">Aire • Intelectuales, curiosos y comunicativos</string>
+    <string name="element_water">Agua • Intuitivos, emocionales y sensibles</string>
 </resources>

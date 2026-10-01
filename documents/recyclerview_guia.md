@@ -29,7 +29,8 @@ data class Horoscope(
     val id: String,
     @param:StringRes val name: Int,
     @param:StringRes val dates: Int,
-    @param:DrawableRes val icon: Int
+    @param:DrawableRes val icon: Int,
+    val type: HoroscopeType
 )
 ```
 
@@ -162,4 +163,30 @@ class MainActivity : AppCompatActivity() {
                │
                ▼
 [ RecyclerView dibujado en MainActivity ]
+```
+
+---
+
+## Solución a Bugs Comunes de Scroll
+
+### Bug: El último elemento queda cortado o pegado a la barra de navegación del sistema
+
+**Causa**: Por defecto, un `RecyclerView` recorta las celdas exactamente dentro de su área visible (`clipToPadding = true`). Cuando la pantalla incluye barras de sistema o bordes, el último elemento toca el borde inferior sin dejar margen de separación.
+
+**Solución**:
+1. Agrega `android:clipToPadding="false"` en el XML del `RecyclerView`. Esto permite que los elementos se puedan desplazar a través del área de relleno.
+2. Agrega espacio al final de la lista con `android:paddingBottom="16dp"`.
+
+```xml
+<androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/recyclerView"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:clipToPadding="false"
+    android:paddingBottom="16dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/tvTitle"
+    tools:listitem="@layout/item_horoscope" />
 ```

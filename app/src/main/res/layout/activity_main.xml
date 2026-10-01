@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Pantalla principal con fondo azul turquesa claro -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,14 +9,38 @@
     android:background="@color/light_turquoise"
     tools:context=".MainActivity">
 
+    <!-- Título principal de la aplicación -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingTop="16dp"
+        android:paddingBottom="12dp"
+        android:text="@string/app_name"
+        android:textColor="@android:color/black"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!--
+      CORRECCIÓN DE BUG EN SCROLL:
+      1. android:clipToPadding="false" permite que los elementos se desplacen por dentro del área de padding.
+      2. android:paddingBottom="16dp" agrega un espacio inferior al final de la lista para que el último elemento
+         no quede tapado o pegado a la barra de navegación del sistema al hacer scroll completo.
+    -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
         tools:listitem="@layout/item_horoscope" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

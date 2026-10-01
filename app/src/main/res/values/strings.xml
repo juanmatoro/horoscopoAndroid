@@ -1,7 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  RECURSOS DE TEXTO EN INGLÉS (DEFAULT / FALLBACK)
+  Android selecciona automáticamente este archivo cuando el idioma del dispositivo
+  no coincide con ninguna otra carpeta específica (ej. values-es, values-fr).
+-->
 <resources>
-    <string name="app_name">horoscopoAndroid</string>
+    <!-- Nombre principal de la aplicación -->
+    <string name="app_name">The Zolthan Horoscope</string>
 
-    <!-- Horoscope Names (English) -->
+    <!-- Nombres de los signos en inglés -->
     <string name="horoscope_name_aries">Aries</string>
     <string name="horoscope_name_taurus">Taurus</string>
     <string name="horoscope_name_gemini">Gemini</string>
@@ -15,7 +22,7 @@
     <string name="horoscope_name_aquarius">Aquarius</string>
     <string name="horoscope_name_pisces">Pisces</string>
 
-    <!-- Horoscope Date Ranges (English) -->
+    <!-- Rangos de fechas en inglés -->
     <string name="horoscope_dates_aries">March 21 - April 19</string>
     <string name="horoscope_dates_taurus">April 20 - May 20</string>
     <string name="horoscope_dates_gemini">May 21 - June 20</string>
@@ -28,4 +35,10 @@
     <string name="horoscope_dates_capricorn">December 22 - January 19</string>
     <string name="horoscope_dates_aquarius">January 20 - February 18</string>
     <string name="horoscope_dates_pisces">February 19 - March 20</string>
+
+    <!-- Notas explicativas de los elementos en inglés -->
+    <string name="element_fire">Fire • Passionate, dynamic, and energetic</string>
+    <string name="element_earth">Earth • Practical, stable, and grounded</string>
+    <string name="element_air">Air • Intellectual, curious, and communicative</string>
+    <string name="element_water">Water • Intuitive, emotional, and sensitive</string>
 </resources>

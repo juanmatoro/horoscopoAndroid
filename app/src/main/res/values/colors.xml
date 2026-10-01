@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Definición de la paleta de colores de la aplicación -->
 <resources>
+    <!-- Colores base de la interfaz -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="light_turquoise">#E0F7FA</color>
+    <color name="light_turquoise">#E0F7FA</color> <!-- Fondo principal de la pantalla -->
+
+    <!-- Colores de fondo por elemento para las tarjetas de cada signo -->
+    <color name="color_fire">#FFCDD2</color>  <!-- Fuego: Tono rojo/cálido suave -->
+    <color name="color_earth">#C8E6C9</color> <!-- Tierra: Tono verde suave -->
+    <color name="color_air">#FFF9C4</color>   <!-- Aire: Tono amarillo suave -->
+    <color name="color_water">#BBDEFB</color>  <!-- Agua: Tono azul suave -->
 </resources>

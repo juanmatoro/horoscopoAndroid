@@ -5,6 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 
 /**
@@ -20,20 +22,35 @@ class HoroscopeAdapter(
      * de un solo elemento (item) de la lista.
      */
     class HoroscopeViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        // Referencia al contenedor CardView para cambiar el color de fondo
+        private val cardContainer: CardView = view.findViewById(R.id.cardContainer)
         private val ivIcon: ImageView = view.findViewById(R.id.ivIcon)
         private val tvName: TextView = view.findViewById(R.id.tvName)
         private val tvDates: TextView = view.findViewById(R.id.tvDates)
+        private val tvDescription: TextView = view.findViewById(R.id.tvDescription)
 
         /**
          * Asigna los datos de un [Horoscope] a las vistas correspondientes.
+         *
+         * NOTA DE INTERNACIONALIZACIÓN (i18n / Localización Novedosa de Android):
+         * Al llamar a `context.getString(R.string.*)`, el sistema de Android selecciona
+         * automáticamente el texto localizado desde el archivo 'strings.xml' correspondiente
+         * al idioma configurado en el dispositivo del usuario (ej. values-es/strings.xml para español).
          */
         fun render(horoscope: Horoscope) {
             val context = itemView.context
-            // Obtiene los textos localizados usando los IDs de recursos
+
+            // Obtención de textos traducidos automáticamente según el idioma del dispositivo
             tvName.text = context.getString(horoscope.name)
             tvDates.text = context.getString(horoscope.dates)
-            // Asigna el ícono desde el recurso drawable
+            tvDescription.text = context.getString(horoscope.type.descriptionRes)
+
+            // Asignación del ícono desde recursos gráficos
             ivIcon.setImageResource(horoscope.icon)
+
+            // Asignación del color del elemento (Fuego, Tierra, Aire, Agua)
+            val color = ContextCompat.getColor(context, horoscope.type.colorRes)
+            cardContainer.setCardBackgroundColor(color)
         }
     }
 

@@ -1,42 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Diseño individual para cada celda/fila de la lista del RecyclerView -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- CardView contenedor que otorga elevación, bordes redondeados y color de fondo dinámico -->
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardContainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:padding="16dp">
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
 
-    <!-- Ícono del signo del horóscopo -->
-    <ImageView
-        android:id="@+id/ivIcon"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:contentDescription="@null" />
-
-    <!-- Contenedor vertical para el nombre y las fechas -->
+    <!-- Contenedor interno horizontal de la celda -->
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
 
-        <!-- Nombre del signo -->
-        <TextView
-            android:id="@+id/tvName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+        <!-- Ícono del signo del horóscopo -->
+        <ImageView
+            android:id="@+id/ivIcon"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:contentDescription="@null" />
 
-        <!-- Rango de fechas -->
-        <TextView
-            android:id="@+id/tvDates"
-            android:layout_width="wrap_content"
+        <!-- Contenedor vertical para el nombre, las fechas y la nota del elemento -->
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="14sp" />
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Nombre del signo -->
+            <TextView
+                android:id="@+id/tvName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <!-- Rango de fechas del signo -->
+            <TextView
+                android:id="@+id/tvDates"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#424242"
+                android:textSize="14sp" />
+
+            <!-- Nota explicativa con el tipo y características genéricas del elemento -->
+            <TextView
+                android:id="@+id/tvDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#37474F"
+                android:textSize="12sp"
+                android:textStyle="italic" />
+        </LinearLayout>
+
     </LinearLayout>
 
-</LinearLayout>
+</androidx.cardview.widget.CardView>
