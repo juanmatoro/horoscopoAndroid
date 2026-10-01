@@ -8,6 +8,10 @@
     <!-- Nombre principal de la aplicación en español -->
     <string name="app_name">El Horóscopo Zolthan</string>
 
+    <!-- Textos con bandera e indicador para el botón de cambio de idioma -->
+    <string name="btn_language_es">🇪🇸 ES</string>
+    <string name="btn_language_en">🇬🇧 EN</string>
+
     <!-- Nombres de los signos en español -->
     <string name="horoscope_name_aries">Aries</string>
     <string name="horoscope_name_taurus">Tauro</string>

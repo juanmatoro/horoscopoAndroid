@@ -1,8 +1,13 @@
 package com.juanmatoro.horoscopoandroid
 
+import android.content.res.ColorStateList
 import android.os.Bundle
+import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
+import androidx.core.os.LocaleListCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -49,5 +54,56 @@ class MainActivity : AppCompatActivity() {
 
         // 3. Conectar el Adapter pasándole la lista de horóscopos
         recyclerView.adapter = HoroscopeAdapter(horoscopeList)
+
+        // 4. Configurar el botón de cambio de idioma (i18n)
+        val btnLanguage: Button = findViewById(R.id.btnLanguage)
+
+        // Actualiza el aspecto visual del botón (muestra el idioma destino al que se cambiará)
+        updateLanguageButtonVisuals(btnLanguage)
+
+        btnLanguage.setOnClickListener {
+            // Consulta el idioma actualmente configurado en la app
+            val currentLocales = AppCompatDelegate.getApplicationLocales()
+            val currentLanguage = if (currentLocales.isEmpty) {
+                resources.configuration.locales[0]?.language ?: "en"
+            } else {
+                currentLocales[0]?.language ?: "en"
+            }
+
+            // Alterna dinámicamente entre Español ("es") e Inglés ("en")
+            val newLanguage = if (currentLanguage == "es") "en" else "es"
+
+            // Aplica la nueva preferencia de idioma a nivel de aplicación (API Oficial Android)
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(newLanguage))
+        }
+    }
+
+    /**
+     * Actualiza el aspecto visual del botón de idioma para mejorar la experiencia de usuario (UX):
+     * Muestra la opción/idioma AL QUE SE CAMBIARÁ al hacer clic (ej. estando en Inglés, muestra "🇪🇸 ES").
+     *
+     * @param btnLanguage Referencia al botón de cambio de idioma en la interfaz.
+     */
+    private fun updateLanguageButtonVisuals(btnLanguage: Button) {
+        val currentLocales = AppCompatDelegate.getApplicationLocales()
+        val currentLanguage = if (currentLocales.isEmpty) {
+            resources.configuration.locales[0]?.language ?: "en"
+        } else {
+            currentLocales[0]?.language ?: "en"
+        }
+
+        if (currentLanguage == "es") {
+            // Si la app está en Español, el botón muestra "🇬🇧 EN" en azul cobalto (invita a cambiar a Inglés)
+            btnLanguage.setText(R.string.btn_language_en)
+            val colorEn = ContextCompat.getColor(this, R.color.color_en)
+            btnLanguage.backgroundTintList = ColorStateList.valueOf(colorEn)
+            btnLanguage.setTextColor(ContextCompat.getColor(this, R.color.white))
+        } else {
+            // Si la app está en Inglés, el botón muestra "🇪🇸 ES" en verde turquesa (invita a cambiar a Español)
+            btnLanguage.setText(R.string.btn_language_es)
+            val colorEs = ContextCompat.getColor(this, R.color.color_es)
+            btnLanguage.backgroundTintList = ColorStateList.valueOf(colorEs)
+            btnLanguage.setTextColor(ContextCompat.getColor(this, R.color.white))
+        }
     }
 }

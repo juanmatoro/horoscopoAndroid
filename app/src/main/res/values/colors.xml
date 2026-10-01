@@ -6,6 +6,10 @@
     <color name="white">#FFFFFFFF</color>
     <color name="light_turquoise">#E0F7FA</color> <!-- Fondo principal de la pantalla -->
 
+    <!-- Colores distintivos para el indicador visual del idioma activo (i18n) -->
+    <color name="color_es">#00796B</color> <!-- Verde turquesa oscuro para indicar Español activo -->
+    <color name="color_en">#1565C0</color> <!-- Azul cobalto oscuro para indicar Inglés activo -->
+
     <!-- Colores de fondo por elemento para las tarjetas de cada signo -->
     <color name="color_fire">#FFCDD2</color>  <!-- Fuego: Tono rojo/cálido suave -->
     <color name="color_earth">#C8E6C9</color> <!-- Tierra: Tono verde suave -->

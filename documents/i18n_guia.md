@@ -71,6 +71,27 @@ val nameText: String = context.getString(horoscope.name)
 
 ---
 
+## Cambio de Idioma Programático desde la App (API Oficial)
+
+Para permitir al usuario cambiar el idioma directamente presionando un botón (sin tener que ir a los Ajustes del sistema), Android ofrece la API nativa `AppCompatDelegate.setApplicationLocales()`:
+
+```kotlin
+val btnLanguage: Button = findViewById(R.id.btnLanguage)
+btnLanguage.setOnClickListener {
+    // 1. Consultar el idioma actual de la app
+    val currentLocales = AppCompatDelegate.getApplicationLocales()
+    val currentLanguage = currentLocales.get(0)?.language ?: "en"
+
+    // 2. Alternar entre Español ("es") e Inglés ("en")
+    val newLanguage = if (currentLanguage == "es") "en" else "es"
+
+    // 3. Aplicar el nuevo idioma (recrea la Activity suavemente con las nuevas traducciones)
+    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(newLanguage))
+}
+```
+
+---
+
 ## Buenas Prácticas
 
 1. **Nunca escribir texto directo (*hardcoded strings*)** ni en Kotlin ni en XMLs de diseño.
@@ -83,7 +104,7 @@ val nameText: String = context.getString(horoscope.name)
 
 ## Cómo Probar las Traducciones en la App
 
-1. Abre los **Ajustes** del emulador o teléfono.
-2. Ve a **Sistema > Idiomas y entradas > Idiomas**.
-3. Arrastra **Español** o **Inglés** al primer lugar de la lista.
-4. Al volver a la aplicación, Android actualizará automáticamente todos los textos sin reiniciar la app.
+1. **Mediante el Botón de Idioma**: Presiona el botón `ES / EN` en la barra superior de la app para cambiar de idioma de forma instantánea.
+2. **Mediante los Ajustes del Sistema**:
+   - Abre **Ajustes > Sistema > Idiomas y entradas > Idiomas** en el teléfono.
+   - Arrastra **Español** o **Inglés** al primer lugar.
