@@ -12,9 +12,13 @@ import androidx.recyclerview.widget.RecyclerView
 /**
  * Adaptador para el RecyclerView que conecta la lista de objetos [Horoscope]
  * con las vistas definidas en [R.layout.item_horoscope].
+ *
+ * @param horoscopeList Lista de elementos [Horoscope] a mostrar.
+ * @param onHoroscopeSelected Función lambda invocada al hacer clic sobre una celda.
  */
 class HoroscopeAdapter(
-    private val horoscopeList: List<Horoscope>
+    private val horoscopeList: List<Horoscope>,
+    private val onHoroscopeSelected: (Horoscope) -> Unit
 ) : RecyclerView.Adapter<HoroscopeAdapter.HoroscopeViewHolder>() {
 
     /**
@@ -22,7 +26,7 @@ class HoroscopeAdapter(
      * de un solo elemento (item) de la lista.
      */
     class HoroscopeViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        // Referencia al contenedor CardView para cambiar el color de fondo
+        // Referencia al contenedor CardView para cambiar el color de fondo y detectar pulsaciones
         private val cardContainer: CardView = view.findViewById(R.id.cardContainer)
         private val ivIcon: ImageView = view.findViewById(R.id.ivIcon)
         private val tvName: TextView = view.findViewById(R.id.tvName)
@@ -30,14 +34,10 @@ class HoroscopeAdapter(
         private val tvDescription: TextView = view.findViewById(R.id.tvDescription)
 
         /**
-         * Asigna los datos de un [Horoscope] a las vistas correspondientes.
-         *
-         * NOTA DE INTERNACIONALIZACIÓN (i18n / Localización Novedosa de Android):
-         * Al llamar a `context.getString(R.string.*)`, el sistema de Android selecciona
-         * automáticamente el texto localizado desde el archivo 'strings.xml' correspondiente
-         * al idioma configurado en el dispositivo del usuario (ej. values-es/strings.xml para español).
+         * Asigna los datos de un [Horoscope] a las vistas correspondientes
+         * y configura la captura del evento de pulsación/clic sobre la celda.
          */
-        fun render(horoscope: Horoscope) {
+        fun render(horoscope: Horoscope, onHoroscopeSelected: (Horoscope) -> Unit) {
             val context = itemView.context
 
             // Obtención de textos traducidos automáticamente según el idioma del dispositivo
@@ -51,28 +51,23 @@ class HoroscopeAdapter(
             // Asignación del color del elemento (Fuego, Tierra, Aire, Agua)
             val color = ContextCompat.getColor(context, horoscope.type.colorRes)
             cardContainer.setCardBackgroundColor(color)
+
+            // Detección de la pulsación sobre la tarjeta para navegar al detalle
+            cardContainer.setOnClickListener {
+                onHoroscopeSelected(horoscope)
+            }
         }
     }
 
-    /**
-     * Infla (crea) el diseño XML del item (item_horoscope.xml)
-     * y crea una nueva instancia del ViewHolder.
-     */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HoroscopeViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_horoscope, parent, false)
         return HoroscopeViewHolder(view)
     }
 
-    /**
-     * Une los datos del elemento en la posición [position] con el [holder] correspondiente.
-     */
     override fun onBindViewHolder(holder: HoroscopeViewHolder, position: Int) {
-        holder.render(horoscopeList[position])
+        holder.render(horoscopeList[position], onHoroscopeSelected)
     }
 
-    /**
-     * Retorna la cantidad total de elementos en la lista.
-     */
     override fun getItemCount(): Int = horoscopeList.size
 }

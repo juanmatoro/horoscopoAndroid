@@ -11,11 +11,13 @@ import androidx.annotation.StringRes
  * @property dates Referencia al recurso de texto con el rango de fechas (R.string.horoscope_dates_*).
  * @property icon Referencia al recurso ejecutable del ícono (R.drawable.*_icon).
  * @property type Elemento del signo (Fuego, Tierra, Aire, Agua) que determina su color.
+ * @property detail Referencia al recurso de texto con la predicción o descripción detallada del signo (R.string.horoscope_detail_*).
  */
 data class Horoscope(
     val id: String,
     @param:StringRes val name: Int,
     @param:StringRes val dates: Int,
     @param:DrawableRes val icon: Int,
-    val type: HoroscopeType
+    val type: HoroscopeType,
+    @param:StringRes val detail: Int
 )

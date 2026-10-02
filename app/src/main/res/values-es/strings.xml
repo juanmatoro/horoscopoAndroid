@@ -8,9 +8,10 @@
     <!-- Nombre principal de la aplicación en español -->
     <string name="app_name">El Horóscopo Zolthan</string>
 
-    <!-- Textos con bandera e indicador para el botón de cambio de idioma -->
+    <!-- Botones de navegación y acciones -->
     <string name="btn_language_es">🇪🇸 ES</string>
     <string name="btn_language_en">🇬🇧 EN</string>
+    <string name="btn_back">← Volver</string>
 
     <!-- Nombres de los signos en español -->
     <string name="horoscope_name_aries">Aries</string>
@@ -45,4 +46,18 @@
     <string name="element_earth">Tierra • Prácticos, estables y realistas</string>
     <string name="element_air">Aire • Intelectuales, curiosos y comunicativos</string>
     <string name="element_water">Agua • Intuitivos, emocionales y sensibles</string>
+
+    <!-- Descripciones detalladas de predicción del horóscopo (Español) -->
+    <string name="horoscope_detail_aries">Aries destaca por su energía audaz y liderazgo pionero. Hoy se presentan nuevas oportunidades de crecimiento. Confía en tu intuición y toma decisiones valientes.</string>
+    <string name="horoscope_detail_taurus">Tauro representa la paciencia, la determinación y la sabiduría práctica. Enfócate hoy en construir bases sólidas. Tu persistencia dará frutos significativos.</string>
+    <string name="horoscope_detail_gemini">Géminis destaca por su curiosidad, agilidad mental y brillante comunicación. Una nueva perspectiva te abrirá puertas hoy. Comparte tus ideas con quienes te rodean.</string>
+    <string name="horoscope_detail_cancer">Cáncer aporta profunda intuición, calidez emocional y protección. Honra tus sentimientos hoy y dedica tiempo de calidad a tus seres queridos.</string>
+    <string name="horoscope_detail_leo">Leo irradia confianza, carisma y entusiasmo creativo. Expresa tus talentos con orgullo hoy. Tu energía positiva inspirará a los demás.</string>
+    <string name="horoscope_detail_virgo">Virgo sobresale por su claridad, organización y dedicación meticulosa. La atención al detalle te permitirá resolver un reto importante hoy.</string>
+    <string name="horoscope_detail_libra">Libra equilibra la armonía, la justicia y las relaciones auténticas. Busca soluciones pacíficas y rodéate de belleza y buena vibra hoy.</string>
+    <string name="horoscope_detail_scorpio">Escorpio canaliza fuerza interior, enfoque y pasión profunda. Descubrirás nuevas verdades si te mantienes fiel a tus valores hoy.</string>
+    <string name="horoscope_detail_sagittarius">Sagitario explora la vida con optimismo, curiosidad aventurera y sabiduría. Acepta nuevos retos y amplía tus horizontes hoy.</string>
+    <string name="horoscope_detail_capricorn">Capricornio demuestra disciplina, ambición y firme responsabilidad. Tu esfuerzo constante y paciencia darán grandes recompensas hoy.</string>
+    <string name="horoscope_detail_aquarius">Acuario inspira originalidad, visión de futuro y auténtica amistad. Piensa de forma diferente y abraza tu perspectiva única hoy.</string>
+    <string name="horoscope_detail_pisces">Piscis conecta con la imaginación, la empatía y la sensibilidad artística. Deja fluir tu creatividad y escucha la voz de tu intuición hoy.</string>
 </resources>
