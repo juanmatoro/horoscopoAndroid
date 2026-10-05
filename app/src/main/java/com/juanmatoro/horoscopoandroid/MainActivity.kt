@@ -2,6 +2,7 @@ package com.juanmatoro.horoscopoandroid
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -18,9 +19,14 @@ import androidx.recyclerview.widget.RecyclerView
 
 /**
  * Pantalla principal que muestra la lista de horóscopos mediante un RecyclerView,
- * permite buscar signos en tiempo real y acceder al horóscopo favorito del usuario.
+ * permite buscar signos en tiempo real con logs explicativos y acceder al horóscopo favorito del usuario.
  */
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        // Etiqueta constante para identificar los mensajes de Logcat del buscador
+        private const val SEARCH_TAG = "SEARCH_LOG"
+    }
 
     // Referencia al adaptador del RecyclerView para actualizar la lista filtrada
     private lateinit var adapter: HoroscopeAdapter
@@ -60,20 +66,39 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Infla el menú superior (activity_main_menu.xml) en la Toolbar, configura
-     * el filtro del SearchView y ajusta el indicador de idioma activo (i18n).
+     * los listeners con logs para el SearchView y ajusta el indicador de idioma activo (i18n).
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.activity_main_menu, menu)
 
-        // 1. Configuración del SearchView interactivo para filtrar signos en tiempo real
+        // 1. Configuración del SearchView interactivo e inserción de logs para monitorear pulsaciones
         val searchItem = menu.findItem(R.id.action_search)
+
+        // Listener para detectar cuándo se despliega/expande o colapsa el buscador en la barra
+        searchItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                Log.d(SEARCH_TAG, "🔎 Buscador ABIERTO/EXPANDIDO por el usuario")
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                Log.d(SEARCH_TAG, "❌ Buscador CERRADO/COLAPSADO por el usuario")
+                return true
+            }
+        })
+
         val searchView = searchItem?.actionView as? SearchView
         searchView?.queryHint = getString(R.string.search_hint)
 
+        // Listener para capturar cada pulsación de tecla e ingreso de caracteres en el SearchView
         searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean = false
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                Log.d(SEARCH_TAG, "⌨️ Búsqueda confirmada (Enter/Submit): '$query'")
+                return false
+            }
 
             override fun onQueryTextChange(newText: String?): Boolean {
+                Log.d(SEARCH_TAG, "🔤 Carácter pulsado / Texto cambiado: '$newText'")
                 filterHoroscopes(newText.orEmpty())
                 return true
             }
@@ -100,7 +125,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Filtra la lista de horóscopos comparando el texto introducido en el SearchView
-     * con el nombre traducido del signo o su ID, y actualiza el adaptador.
+     * e imprime logs detallados del proceso de filtrado.
      *
      * @param query Texto de búsqueda ingresado por el usuario.
      */
@@ -109,6 +134,9 @@ class MainActivity : AppCompatActivity() {
             val nameText = getString(horoscope.name)
             nameText.contains(query, ignoreCase = true) || horoscope.id.contains(query, ignoreCase = true)
         }
+
+        // Log que detalla el texto buscado y cuántos resultados coinciden
+        Log.d(SEARCH_TAG, "🎯 Filtrando por término: '$query' -> Resultados encontrados: ${filteredList.size}")
         adapter.updateList(filteredList)
     }
 
@@ -122,19 +150,16 @@ class MainActivity : AppCompatActivity() {
                 val favoriteId = FavoriteManager.getFavorite(this)
 
                 if (favoriteId != null) {
-                    // Si existe un favorito guardado, abre directamente su pantalla de detalle
                     val intent = Intent(this, DetailActivity::class.java).apply {
                         putExtra(DetailActivity.EXTRA_HOROSCOPE_ID, favoriteId)
                     }
                     startActivity(intent)
                 } else {
-                    // Si aún no se ha marcado ninguno, muestra un Toast explicativo
                     Toast.makeText(this, getString(R.string.favorite_none_saved), Toast.LENGTH_LONG).show()
                 }
                 true
             }
             R.id.action_language -> {
-                // Alterna dinámicamente entre Español ("es") e Inglés ("en") usando la API nativa de Android
                 val currentLocales = AppCompatDelegate.getApplicationLocales()
                 val currentLanguage = if (currentLocales.isEmpty) {
                     resources.configuration.locales[0]?.language ?: "en"
