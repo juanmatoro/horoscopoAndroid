@@ -1,13 +1,15 @@
 package com.juanmatoro.horoscopoandroid
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Bundle
-import android.widget.Button
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.ContextCompat
+import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.Toolbar
 import androidx.core.os.LocaleListCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -15,14 +17,22 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 /**
- * Pantalla principal que muestra la lista de horóscopos mediante un RecyclerView.
+ * Pantalla principal que muestra la lista de horóscopos mediante un RecyclerView,
+ * permite buscar signos en tiempo real y acceder al horóscopo favorito del usuario.
  */
 class MainActivity : AppCompatActivity() {
+
+    // Referencia al adaptador del RecyclerView para actualizar la lista filtrada
+    private lateinit var adapter: HoroscopeAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        // Configuración de la MaterialToolbar como ActionBar oficial de la pantalla
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
         // Configuración para respetar las barras de estado y navegación del sistema (edge-to-edge)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -37,23 +47,41 @@ class MainActivity : AppCompatActivity() {
         // 2. Definir el LayoutManager (LinearLayoutManager muestra los elementos en lista vertical)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // 3. Conectar el Adapter pasándole la lista de horóscopos y el evento de clic para navegar
-        recyclerView.adapter = HoroscopeAdapter(HoroscopeProvider.horoscopeList) { horoscope ->
+        // 3. Crear e inicializar el Adapter con la lista completa y la acción de navegación al detalle
+        adapter = HoroscopeAdapter(HoroscopeProvider.horoscopeList) { horoscope ->
             // Al hacer clic en un elemento, creamos un Intent explícito para abrir DetailActivity
             val intent = Intent(this, DetailActivity::class.java).apply {
                 putExtra(DetailActivity.EXTRA_HOROSCOPE_ID, horoscope.id)
             }
             startActivity(intent)
         }
+        recyclerView.adapter = adapter
+    }
 
-        // 4. Configurar el botón de cambio de idioma (i18n)
-        val btnLanguage: Button = findViewById(R.id.btnLanguage)
+    /**
+     * Infla el menú superior (activity_main_menu.xml) en la Toolbar, configura
+     * el filtro del SearchView y ajusta el indicador de idioma activo (i18n).
+     */
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.activity_main_menu, menu)
 
-        // Actualiza el aspecto visual del botón (muestra el idioma destino al que se cambiará)
-        updateLanguageButtonVisuals(btnLanguage)
+        // 1. Configuración del SearchView interactivo para filtrar signos en tiempo real
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem?.actionView as? SearchView
+        searchView?.queryHint = getString(R.string.search_hint)
 
-        btnLanguage.setOnClickListener {
-            // Consulta el idioma actualmente configurado en la app
+        searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean = false
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                filterHoroscopes(newText.orEmpty())
+                return true
+            }
+        })
+
+        // 2. Configura la opción de idioma mostrando la bandera/idioma al que se cambiará (UX)
+        val languageItem = menu.findItem(R.id.action_language)
+        if (languageItem != null) {
             val currentLocales = AppCompatDelegate.getApplicationLocales()
             val currentLanguage = if (currentLocales.isEmpty) {
                 resources.configuration.locales[0]?.language ?: "en"
@@ -61,40 +89,63 @@ class MainActivity : AppCompatActivity() {
                 currentLocales[0]?.language ?: "en"
             }
 
-            // Alterna dinámicamente entre Español ("es") e Inglés ("en")
-            val newLanguage = if (currentLanguage == "es") "en" else "es"
-
-            // Aplica la nueva preferencia de idioma a nivel de aplicación (API Oficial Android)
-            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(newLanguage))
+            if (currentLanguage == "es") {
+                languageItem.setTitle(R.string.btn_language_en)
+            } else {
+                languageItem.setTitle(R.string.btn_language_es)
+            }
         }
+        return true
     }
 
     /**
-     * Actualiza el aspecto visual del botón de idioma para mejorar la experiencia de usuario (UX):
-     * Muestra la opción/idioma AL QUE SE CAMBIARÁ al hacer clic (ej. estando en Inglés, muestra "🇪🇸 ES").
+     * Filtra la lista de horóscopos comparando el texto introducido en el SearchView
+     * con el nombre traducido del signo o su ID, y actualiza el adaptador.
      *
-     * @param btnLanguage Referencia al botón de cambio de idioma en la interfaz.
+     * @param query Texto de búsqueda ingresado por el usuario.
      */
-    private fun updateLanguageButtonVisuals(btnLanguage: Button) {
-        val currentLocales = AppCompatDelegate.getApplicationLocales()
-        val currentLanguage = if (currentLocales.isEmpty) {
-            resources.configuration.locales[0]?.language ?: "en"
-        } else {
-            currentLocales[0]?.language ?: "en"
+    private fun filterHoroscopes(query: String) {
+        val filteredList = HoroscopeProvider.horoscopeList.filter { horoscope ->
+            val nameText = getString(horoscope.name)
+            nameText.contains(query, ignoreCase = true) || horoscope.id.contains(query, ignoreCase = true)
         }
+        adapter.updateList(filteredList)
+    }
 
-        if (currentLanguage == "es") {
-            // Si la app está en Español, el botón muestra "🇬🇧 EN" en azul cobalto (invita a cambiar a Inglés)
-            btnLanguage.setText(R.string.btn_language_en)
-            val colorEn = ContextCompat.getColor(this, R.color.color_en)
-            btnLanguage.backgroundTintList = ColorStateList.valueOf(colorEn)
-            btnLanguage.setTextColor(ContextCompat.getColor(this, R.color.white))
-        } else {
-            // Si la app está en Inglés, el botón muestra "🇪🇸 ES" en verde turquesa (invita a cambiar a Español)
-            btnLanguage.setText(R.string.btn_language_es)
-            val colorEs = ContextCompat.getColor(this, R.color.color_es)
-            btnLanguage.backgroundTintList = ColorStateList.valueOf(colorEs)
-            btnLanguage.setTextColor(ContextCompat.getColor(this, R.color.white))
+    /**
+     * Captura y responde a los eventos de pulsación sobre las opciones del menú de la Toolbar.
+     */
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_favorite -> {
+                // Función Favorito: Obtiene el ID del signo favorito guardado por el usuario
+                val favoriteId = FavoriteManager.getFavorite(this)
+
+                if (favoriteId != null) {
+                    // Si existe un favorito guardado, abre directamente su pantalla de detalle
+                    val intent = Intent(this, DetailActivity::class.java).apply {
+                        putExtra(DetailActivity.EXTRA_HOROSCOPE_ID, favoriteId)
+                    }
+                    startActivity(intent)
+                } else {
+                    // Si aún no se ha marcado ninguno, muestra un Toast explicativo
+                    Toast.makeText(this, getString(R.string.favorite_none_saved), Toast.LENGTH_LONG).show()
+                }
+                true
+            }
+            R.id.action_language -> {
+                // Alterna dinámicamente entre Español ("es") e Inglés ("en") usando la API nativa de Android
+                val currentLocales = AppCompatDelegate.getApplicationLocales()
+                val currentLanguage = if (currentLocales.isEmpty) {
+                    resources.configuration.locales[0]?.language ?: "en"
+                } else {
+                    currentLocales[0]?.language ?: "en"
+                }
+                val newLanguage = if (currentLanguage == "es") "en" else "es"
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(newLanguage))
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 }

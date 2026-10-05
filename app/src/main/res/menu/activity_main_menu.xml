@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MENÚ SUPERIOR DE LA PANTALLA PRINCIPAL (MainActivity)
+  1. Opción de búsqueda con SearchView interactivo.
+  2. Opción para ver el horóscopo favorito del usuario (icono de estrella).
+  3. Botón de cambio de idioma (i18n / Material Design).
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Acción de Búsqueda interactiva con SearchView -->
+    <item
+        android:id="@+id/action_search"
+        android:icon="@android:drawable/ic_menu_search"
+        android:title="@string/search_menu"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="collapseActionView|ifRoom" />
+
+    <!-- Acción para ver el Horóscopo Favorito del Usuario -->
+    <item
+        android:id="@+id/action_favorite"
+        android:icon="@android:drawable/btn_star_big_on"
+        android:title="@string/action_favorite"
+        app:showAsAction="ifRoom" />
+
+    <!-- Acción de Cambio de Idioma (i18n / Material Design) -->
+    <item
+        android:id="@+id/action_language"
+        android:title="@string/btn_language_es"
+        app:showAsAction="always" />
+
+</menu>

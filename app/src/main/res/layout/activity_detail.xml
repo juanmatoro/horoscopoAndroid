@@ -9,34 +9,17 @@
     android:background="@color/light_turquoise"
     tools:context=".DetailActivity">
 
-    <!-- Botón superior para regresar a la pantalla principal -->
-    <TextView
-        android:id="@+id/btnBack"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:text="@string/btn_back"
-        android:textColor="@android:color/black"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/btnLanguage"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Botón siempre visible en la cabecera para cambiar el idioma de la app -->
-    <Button
-        android:id="@+id/btnLanguage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:textSize="13sp"
-        android:textStyle="bold"
+    <!-- MaterialToolbar superior que contiene el botón de regreso (flecha atrás) y el menú de idioma -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbarDetail"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/light_turquoise"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="🇪🇸 ES" />
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:titleTextColor="@android:color/black" />
 
     <!-- Tarjeta de cabecera con el color del elemento del signo -->
     <androidx.cardview.widget.CardView
@@ -50,7 +33,7 @@
         app:cardElevation="6dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnLanguage">
+        app:layout_constraintTop_toBottomOf="@id/toolbarDetail">
 
         <LinearLayout
             android:layout_width="match_parent"

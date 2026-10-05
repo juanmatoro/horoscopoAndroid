@@ -13,11 +13,11 @@ import androidx.recyclerview.widget.RecyclerView
  * Adaptador para el RecyclerView que conecta la lista de objetos [Horoscope]
  * con las vistas definidas en [R.layout.item_horoscope].
  *
- * @param horoscopeList Lista de elementos [Horoscope] a mostrar.
+ * @property horoscopeList Lista interna de elementos [Horoscope] a mostrar.
  * @param onHoroscopeSelected Función lambda invocada al hacer clic sobre una celda.
  */
 class HoroscopeAdapter(
-    private val horoscopeList: List<Horoscope>,
+    private var horoscopeList: List<Horoscope>,
     private val onHoroscopeSelected: (Horoscope) -> Unit
 ) : RecyclerView.Adapter<HoroscopeAdapter.HoroscopeViewHolder>() {
 
@@ -70,4 +70,14 @@ class HoroscopeAdapter(
     }
 
     override fun getItemCount(): Int = horoscopeList.size
+
+    /**
+     * Actualiza la lista de datos mostrada en el RecyclerView y notifica el refresco (usado en búsquedas).
+     *
+     * @param newList Nueva lista de horóscopos a renderizar.
+     */
+    fun updateList(newList: List<Horoscope>) {
+        this.horoscopeList = newList
+        notifyDataSetChanged()
+    }
 }

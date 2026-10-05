@@ -1,13 +1,15 @@
 package com.juanmatoro.horoscopoandroid
 
-import android.content.res.ColorStateList
 import android.os.Bundle
-import android.widget.Button
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.os.LocaleListCompat
@@ -15,7 +17,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 /**
- * Pantalla de detalle que muestra la información completa del signo del horóscopo seleccionado.
+ * Pantalla de detalle que muestra la información completa del signo del horóscopo seleccionado,
+ * y permite marcar o desmarcar dicho signo como el favorito del usuario.
  */
 class DetailActivity : AppCompatActivity() {
 
@@ -24,10 +27,18 @@ class DetailActivity : AppCompatActivity() {
         const val EXTRA_HOROSCOPE_ID = "extra_horoscope_id"
     }
 
+    // Guardamos la referencia del ID del signo actual en esta pantalla
+    private var currentHoroscopeId: String = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_detail)
+
+        // Configurar la MaterialToolbar como ActionBar con botón de navegación hacia atrás
+        val toolbar: Toolbar = findViewById(R.id.toolbarDetail)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         // Configuración para respetar las barras de estado y navegación del sistema (edge-to-edge)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.detailMain)) { v, insets ->
@@ -37,10 +48,10 @@ class DetailActivity : AppCompatActivity() {
         }
 
         // 1. Obtener el ID del signo enviado desde MainActivity mediante Intent extra
-        val horoscopeId = intent.getStringExtra(EXTRA_HOROSCOPE_ID) ?: ""
+        currentHoroscopeId = intent.getStringExtra(EXTRA_HOROSCOPE_ID) ?: ""
 
         // 2. Buscar el objeto Horoscope correspondiente a través del proveedor de datos
-        val horoscope = HoroscopeProvider.getHoroscopeById(horoscopeId)
+        val horoscope = HoroscopeProvider.getHoroscopeById(currentHoroscopeId)
 
         if (horoscope != null) {
             // 3. Obtener referencias visuales del layout activity_detail.xml
@@ -50,23 +61,11 @@ class DetailActivity : AppCompatActivity() {
             val tvDetailDates: TextView = findViewById(R.id.tvDetailDates)
             val tvDetailElement: TextView = findViewById(R.id.tvDetailElement)
             val tvDetailText: TextView = findViewById(R.id.tvDetailText)
-            val btnBack: TextView = findViewById(R.id.btnBack)
-            val btnLanguage: Button = findViewById(R.id.btnLanguage)
 
-            // 4. Configurar el botón de cambio de idioma en la cabecera
-            updateLanguageButtonVisuals(btnLanguage)
-            btnLanguage.setOnClickListener {
-                val currentLocales = AppCompatDelegate.getApplicationLocales()
-                val currentLanguage = if (currentLocales.isEmpty) {
-                    resources.configuration.locales[0]?.language ?: "en"
-                } else {
-                    currentLocales[0]?.language ?: "en"
-                }
-                val newLanguage = if (currentLanguage == "es") "en" else "es"
-                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(newLanguage))
-            }
+            // Asignar el nombre del signo como título de la Toolbar
+            supportActionBar?.title = getString(horoscope.name)
 
-            // 5. Asignar los datos del signo seleccionado
+            // 4. Asignar los datos del signo seleccionado
             tvDetailName.text = getString(horoscope.name)
             tvDetailDates.text = getString(horoscope.dates)
             tvDetailElement.text = getString(horoscope.type.descriptionRes)
@@ -76,42 +75,89 @@ class DetailActivity : AppCompatActivity() {
             // Asignar el color del elemento a la tarjeta de cabecera
             val color = ContextCompat.getColor(this, horoscope.type.colorRes)
             cardHeader.setCardBackgroundColor(color)
-
-            // Configurar el botón para regresar a la pantalla anterior
-            btnBack.setOnClickListener {
-                finish() // Cierra la Activity actual y regresa a la Activity previa
-            }
         } else {
             finish()
         }
     }
 
     /**
-     * Actualiza el aspecto visual del botón de idioma en la cabecera (texto con bandera y color de fondo)
-     * indicando el idioma al que se cambiará al hacer clic (UX).
-     *
-     * @param btnLanguage Referencia al botón de cambio de idioma en la interfaz.
+     * Infla el menú superior (activity_detail_menu.xml) dentro de la Toolbar de detalle
+     * y actualiza el icono de la estrella según si este signo es el favorito guardado.
      */
-    private fun updateLanguageButtonVisuals(btnLanguage: Button) {
-        val currentLocales = AppCompatDelegate.getApplicationLocales()
-        val currentLanguage = if (currentLocales.isEmpty) {
-            resources.configuration.locales[0]?.language ?: "en"
-        } else {
-            currentLocales[0]?.language ?: "en"
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.activity_detail_menu, menu)
+
+        // 1. Actualiza el icono de la estrella si este signo ya es el favorito del usuario
+        val favoriteItem = menu.findItem(R.id.action_favorite)
+        if (favoriteItem != null && currentHoroscopeId.isNotEmpty()) {
+            val isFav = FavoriteManager.isFavorite(this, currentHoroscopeId)
+            favoriteItem.setIcon(
+                if (isFav) android.R.drawable.btn_star_big_on else android.R.drawable.btn_star_big_off
+            )
         }
 
-        if (currentLanguage == "es") {
-            // Si la app está en Español, el botón muestra "🇬🇧 EN" (invita a cambiar a Inglés)
-            btnLanguage.setText(R.string.btn_language_en)
-            val colorEn = ContextCompat.getColor(this, R.color.color_en)
-            btnLanguage.backgroundTintList = ColorStateList.valueOf(colorEn)
-            btnLanguage.setTextColor(ContextCompat.getColor(this, R.color.white))
-        } else {
-            // Si la app está en Inglés, el botón muestra "🇪🇸 ES" (invita a cambiar a Español)
-            btnLanguage.setText(R.string.btn_language_es)
-            val colorEs = ContextCompat.getColor(this, R.color.color_es)
-            btnLanguage.backgroundTintList = ColorStateList.valueOf(colorEs)
-            btnLanguage.setTextColor(ContextCompat.getColor(this, R.color.white))
+        // 2. Actualiza la opción de idioma
+        val languageItem = menu.findItem(R.id.action_language)
+        if (languageItem != null) {
+            val currentLocales = AppCompatDelegate.getApplicationLocales()
+            val currentLanguage = if (currentLocales.isEmpty) {
+                resources.configuration.locales[0]?.language ?: "en"
+            } else {
+                currentLocales[0]?.language ?: "en"
+            }
+
+            if (currentLanguage == "es") {
+                languageItem.setTitle(R.string.btn_language_en)
+            } else {
+                languageItem.setTitle(R.string.btn_language_es)
+            }
+        }
+        return true
+    }
+
+    /**
+     * Captura las opciones seleccionadas en el menú, permitiendo marcar/desmarcar
+     * este signo como favorito en SharedPreferences.
+     */
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                // Flecha atrás: regresa a MainActivity
+                finish()
+                true
+            }
+            R.id.action_favorite -> {
+                // Alterna el estado de favorito del signo actual
+                val isCurrentlyFavorite = FavoriteManager.isFavorite(this, currentHoroscopeId)
+                val horoscope = HoroscopeProvider.getHoroscopeById(currentHoroscopeId)
+
+                if (isCurrentlyFavorite) {
+                    // Si ya era favorito, lo desmarca y elimina de SharedPreferences
+                    FavoriteManager.clearFavorite(this)
+                    item.setIcon(android.R.drawable.btn_star_big_off)
+                    Toast.makeText(this, getString(R.string.favorite_removed_message), Toast.LENGTH_SHORT).show()
+                } else {
+                    // Si no era favorito, lo guarda como favorito en SharedPreferences
+                    FavoriteManager.saveFavorite(this, currentHoroscopeId)
+                    item.setIcon(android.R.drawable.btn_star_big_on)
+                    val name = horoscope?.name?.let { getString(it) } ?: currentHoroscopeId
+                    Toast.makeText(this, "$name ${getString(R.string.favorite_set_success)}", Toast.LENGTH_SHORT).show()
+                }
+                true
+            }
+            R.id.action_language -> {
+                // Alterna el idioma de la app usando AppCompatDelegate
+                val currentLocales = AppCompatDelegate.getApplicationLocales()
+                val currentLanguage = if (currentLocales.isEmpty) {
+                    resources.configuration.locales[0]?.language ?: "en"
+                } else {
+                    currentLocales[0]?.language ?: "en"
+                }
+                val newLanguage = if (currentLanguage == "es") "en" else "es"
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(newLanguage))
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 }

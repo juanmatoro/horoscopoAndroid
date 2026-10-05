@@ -8,10 +8,16 @@
     <!-- Nombre principal de la aplicación -->
     <string name="app_name">The Zolthan Horoscope</string>
 
-    <!-- Botones de navegación y acciones -->
+    <!-- Botones y Opciones de Menú -->
     <string name="btn_language_es">🇪🇸 ES</string>
     <string name="btn_language_en">🇬🇧 EN</string>
     <string name="btn_back">← Back</string>
+    <string name="search_menu">Search</string>
+    <string name="search_hint">Search horoscope...</string>
+    <string name="action_favorite">Favorite</string>
+    <string name="favorite_set_success">marked as your favorite horoscope!</string>
+    <string name="favorite_removed_message">Removed from favorites</string>
+    <string name="favorite_none_saved">You have not selected a favorite horoscope yet. Choose one on its detail screen!</string>
 
     <!-- Nombres de los signos en inglés -->
     <string name="horoscope_name_aries">Aries</string>
