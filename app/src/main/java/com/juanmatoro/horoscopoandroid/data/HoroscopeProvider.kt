@@ -1,4 +1,6 @@
-package com.juanmatoro.horoscopoandroid
+package com.juanmatoro.horoscopoandroid.data
+
+import com.juanmatoro.horoscopoandroid.R
 
 /**
  * Proveedor de datos centralizado para acceder a la lista de horóscopos y buscar por ID.

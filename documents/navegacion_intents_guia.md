@@ -1,6 +1,6 @@
 # Guía de Navegación e Intents en Android (Paso a Paso)
 
-En Android, para cambiar de una pantalla (**Activity**) a otra y pasar información entre ellas, utilizamos **Intents Explícitos**.
+En Android, para cambiar de una pantalla (**Activity**) a otra y pasar información entre ellas, utilizamos **Intents Explícitos**. Para comunicarnos con aplicaciones externas (por ejemplo, para compartir un texto), utilizamos **Intents Implícitos**.
 
 ---
 
@@ -8,8 +8,9 @@ En Android, para cambiar de una pantalla (**Activity**) a otra y pasar informaci
 
 1. **Activity**: Representa cada pantalla independiente de la aplicación.
 2. **Intent Explícito**: Un mensaje que le indica al sistema operativo Android: *"Quiero abrir específicamente la pantalla Y partiendo desde la pantalla X"*.
-3. **Extras**: Datos adicionales que adjuntamos dentro del `Intent` (como una mochila con clave-valor) para enviárselos a la pantalla destino.
-4. **`finish()`**: Método que cierra la pantalla actual y regresa a la pantalla anterior del historial (Back Stack).
+3. **Intent Implícito**: Un mensaje que le pide al sistema operativo: *"Quiero realizar la acción Z (ej. compartir texto) con cualquier app capaz de procesarla"*.
+4. **Extras**: Datos adicionales que adjuntamos dentro del `Intent` (como una mochila con clave-valor) para enviárselos a la pantalla destino.
+5. **`finish()`**: Método que cierra la pantalla actual y regresa a la pantalla anterior del historial (Back Stack).
 
 ---
 
@@ -67,14 +68,14 @@ Toda nueva Activity **debe estar registrada** en el manifiesto para que el siste
 
         <!-- Pantalla principal -->
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:exported="true">
             ...
         </activity>
 
         <!-- Nueva pantalla de detalle -->
         <activity
-            android:name=".DetailActivity"
+            android:name=".activities.DetailActivity"
             android:exported="false" />
 
     </application>
@@ -144,6 +145,38 @@ class DetailActivity : AppCompatActivity() {
 
 ---
 
+## Intents Implícitos: Compartir Contenido con Otras Aplicaciones
+
+A diferencia de un **Intent Explícito** (que abre una pantalla específica de nuestra propia app), un **Intent Implícito** le pide a Android que busque cualquier aplicación instalada en el teléfono capaz de realizar una acción genérica (ej. enviar texto a WhatsApp, Gmail, Mensajes, etc.).
+
+### Ejemplo: Compartir la predicción del Horóscopo (`ACTION_SEND`)
+
+En `DetailActivity.kt`, creamos un Intent con la acción `Intent.ACTION_SEND`, le asignamos el texto que queremos compartir y usamos `Intent.createChooser()` para desplegar el selector nativo de aplicaciones de Android:
+
+```kotlin
+private fun shareHoroscope(horoscope: Horoscope) {
+    val name = getString(horoscope.name)
+    val dates = getString(horoscope.dates)
+    val detail = getString(horoscope.detail)
+
+    // 1. Crear el mensaje de texto estructurado a compartir
+    val shareText = "✨ $name ($dates) ✨\n\n$detail\n\n- ${getString(R.string.app_name)}"
+
+    // 2. Crear el Intent implícito de tipo ACTION_SEND para texto plano
+    val sendIntent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, shareText)
+        type = "text/plain"
+    }
+
+    // 3. Crear el menú selector de aplicaciones de Android (Chooser) e iniciarlo
+    val shareIntent = Intent.createChooser(sendIntent, getString(R.string.share_title))
+    startActivity(shareIntent)
+}
+```
+
+---
+
 ## Flujo Completo de Navegación
 
 ```text
@@ -161,7 +194,8 @@ class DetailActivity : AppCompatActivity() {
 [ DetailActivity ]
    ├── Lee extra ("aries")
    ├── Busca datos en HoroscopeProvider
-   └── Muestra detalle e ícono de Aries
+   ├── Muestra detalle e ícono de Aries
+   └── Permite compartir el texto mediante un Intent implícito (ACTION_SEND)
            │
   (Usuario pulsa "← Volver")
            │

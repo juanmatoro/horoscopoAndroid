@@ -1,4 +1,4 @@
-package com.juanmatoro.horoscopoandroid
+package com.juanmatoro.horoscopoandroid.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +8,8 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.juanmatoro.horoscopoandroid.R
+import com.juanmatoro.horoscopoandroid.data.Horoscope
 
 /**
  * Adaptador para el RecyclerView que conecta la lista de objetos [Horoscope]

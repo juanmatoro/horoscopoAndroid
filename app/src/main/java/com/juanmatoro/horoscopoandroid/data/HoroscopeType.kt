@@ -1,7 +1,8 @@
-package com.juanmatoro.horoscopoandroid
+package com.juanmatoro.horoscopoandroid.data
 
 import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
+import com.juanmatoro.horoscopoandroid.R
 
 /**
  * Enumeración que representa los 4 elementos de los signos del zodíaco.

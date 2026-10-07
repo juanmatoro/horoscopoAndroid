@@ -1,4 +1,4 @@
-package com.juanmatoro.horoscopoandroid
+package com.juanmatoro.horoscopoandroid.data
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes

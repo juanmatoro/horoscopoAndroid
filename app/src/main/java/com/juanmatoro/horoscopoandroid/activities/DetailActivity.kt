@@ -1,11 +1,11 @@
-package com.juanmatoro.horoscopoandroid
+package com.juanmatoro.horoscopoandroid.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -15,10 +15,15 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.LocaleListCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.juanmatoro.horoscopoandroid.R
+import com.juanmatoro.horoscopoandroid.data.FavoriteManager
+import com.juanmatoro.horoscopoandroid.data.Horoscope
+import com.juanmatoro.horoscopoandroid.data.HoroscopeProvider
+import com.juanmatoro.horoscopoandroid.utils.showToast
 
 /**
  * Pantalla de detalle que muestra la información completa del signo del horóscopo seleccionado,
- * y permite marcar o desmarcar dicho signo como el favorito del usuario.
+ * permite marcar o desmarcar dicho signo como favorito y compartir su contenido con otras aplicaciones.
  */
 class DetailActivity : AppCompatActivity() {
 
@@ -81,8 +86,9 @@ class DetailActivity : AppCompatActivity() {
     }
 
     /**
-     * Infla el menú superior (activity_detail_menu.xml) dentro de la Toolbar de detalle
-     * y actualiza el icono de la estrella según si este signo es el favorito guardado.
+     * Infla el menú superior (activity_detail_menu.xml) dentro de la Toolbar de detalle,
+     * actualiza el icono de la estrella según si este signo es el favorito guardado
+     * y configura la opción del menú de idioma.
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.activity_detail_menu, menu)
@@ -116,14 +122,25 @@ class DetailActivity : AppCompatActivity() {
     }
 
     /**
-     * Captura las opciones seleccionadas en el menú, permitiendo marcar/desmarcar
-     * este signo como favorito en SharedPreferences.
+     * Captura y procesa las opciones del menú seleccionadas por el usuario:
+     * - Flecha Atrás: Regresa a MainActivity.
+     * - Compartir: Inicia un Intent implícito (ACTION_SEND) para enviar la predicción a otras apps.
+     * - Favorito: Marca o desmarca este signo como el favorito del usuario.
+     * - Idioma: Alterna dinámicamente el idioma de la aplicación (i18n).
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
                 // Flecha atrás: regresa a MainActivity
                 finish()
+                true
+            }
+            R.id.action_share -> {
+                // Función Compartir: Comparte la predicción actual con otras aplicaciones
+                val horoscope = HoroscopeProvider.getHoroscopeById(currentHoroscopeId)
+                if (horoscope != null) {
+                    shareHoroscope(horoscope)
+                }
                 true
             }
             R.id.action_favorite -> {
@@ -135,13 +152,13 @@ class DetailActivity : AppCompatActivity() {
                     // Si ya era favorito, lo desmarca y elimina de SharedPreferences
                     FavoriteManager.clearFavorite(this)
                     item.setIcon(android.R.drawable.btn_star_big_off)
-                    Toast.makeText(this, getString(R.string.favorite_removed_message), Toast.LENGTH_SHORT).show()
+                    showToast(getString(R.string.favorite_removed_message))
                 } else {
                     // Si no era favorito, lo guarda como favorito en SharedPreferences
                     FavoriteManager.saveFavorite(this, currentHoroscopeId)
                     item.setIcon(android.R.drawable.btn_star_big_on)
                     val name = horoscope?.name?.let { getString(it) } ?: currentHoroscopeId
-                    Toast.makeText(this, "$name ${getString(R.string.favorite_set_success)}", Toast.LENGTH_SHORT).show()
+                    showToast("$name ${getString(R.string.favorite_set_success)}")
                 }
                 true
             }
@@ -159,5 +176,32 @@ class DetailActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    /**
+     * Prepara y dispara un Intent implícito de tipo ACTION_SEND con el selector (Chooser)
+     * para compartir el texto traducido del signo del horóscopo con aplicaciones externas
+     * (WhatsApp, Gmail, Mensajes, etc.).
+     *
+     * @param horoscope Objeto con la información del signo a compartir.
+     */
+    private fun shareHoroscope(horoscope: Horoscope) {
+        val name = getString(horoscope.name)
+        val dates = getString(horoscope.dates)
+        val detail = getString(horoscope.detail)
+
+        // Formateo del mensaje estructurado a compartir
+        val shareText = "✨ $name ($dates) ✨\n\n$detail\n\n- ${getString(R.string.app_name)}"
+
+        // Creación del Intent implícito ACTION_SEND para texto plano
+        val sendIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, shareText)
+            type = "text/plain"
+        }
+
+        // Creación del selector nativo de aplicaciones (Chooser)
+        val shareIntent = Intent.createChooser(sendIntent, getString(R.string.share_title))
+        startActivity(shareIntent)
     }
 }

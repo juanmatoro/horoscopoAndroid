@@ -1,4 +1,4 @@
-package com.juanmatoro.horoscopoandroid
+package com.juanmatoro.horoscopoandroid.activities
 
 import android.content.Intent
 import android.os.Bundle
@@ -16,6 +16,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.juanmatoro.horoscopoandroid.R
+import com.juanmatoro.horoscopoandroid.adapters.HoroscopeAdapter
+import com.juanmatoro.horoscopoandroid.data.FavoriteManager
+import com.juanmatoro.horoscopoandroid.data.HoroscopeProvider
+import com.juanmatoro.horoscopoandroid.utils.showToast
 
 /**
  * Pantalla principal que muestra la lista de horóscopos mediante un RecyclerView,
@@ -155,7 +160,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     startActivity(intent)
                 } else {
-                    Toast.makeText(this, getString(R.string.favorite_none_saved), Toast.LENGTH_LONG).show()
+                    showToast(getString(R.string.favorite_none_saved), Toast.LENGTH_LONG)
                 }
                 true
             }

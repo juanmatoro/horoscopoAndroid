@@ -18,6 +18,8 @@
     <string name="favorite_set_success">marked as your favorite horoscope!</string>
     <string name="favorite_removed_message">Removed from favorites</string>
     <string name="favorite_none_saved">You have not selected a favorite horoscope yet. Choose one on its detail screen!</string>
+    <string name="action_share">Share</string>
+    <string name="share_title">Share Horoscope</string>
 
     <!-- Nombres de los signos en inglés -->
     <string name="horoscope_name_aries">Aries</string>
