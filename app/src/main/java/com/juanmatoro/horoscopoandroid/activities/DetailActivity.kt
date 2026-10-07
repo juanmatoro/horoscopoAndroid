@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -35,6 +36,9 @@ class DetailActivity : AppCompatActivity() {
     // Guardamos la referencia del ID del signo actual en esta pantalla
     private var currentHoroscopeId: String = ""
 
+    // Referencia al badge de corazón pequeño en la esquina superior derecha de la imagen de cabecera
+    private lateinit var ivDetailFavoriteBadge: ImageView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -62,6 +66,7 @@ class DetailActivity : AppCompatActivity() {
             // 3. Obtener referencias visuales del layout activity_detail.xml
             val cardHeader: CardView = findViewById(R.id.cardHeader)
             val ivDetailIcon: ImageView = findViewById(R.id.ivDetailIcon)
+            ivDetailFavoriteBadge = findViewById(R.id.ivDetailFavoriteBadge)
             val tvDetailName: TextView = findViewById(R.id.tvDetailName)
             val tvDetailDates: TextView = findViewById(R.id.tvDetailDates)
             val tvDetailElement: TextView = findViewById(R.id.tvDetailElement)
@@ -77,6 +82,9 @@ class DetailActivity : AppCompatActivity() {
             tvDetailText.text = getString(horoscope.detail)
             ivDetailIcon.setImageResource(horoscope.icon)
 
+            // Actualizar el estado visual del corazón pequeño en la esquina de la imagen
+            updateFavoriteBadge()
+
             // Asignar el color del elemento a la tarjeta de cabecera
             val color = ContextCompat.getColor(this, horoscope.type.colorRes)
             cardHeader.setCardBackgroundColor(color)
@@ -86,9 +94,19 @@ class DetailActivity : AppCompatActivity() {
     }
 
     /**
+     * Muestra u oculta el corazón pequeño superpuesto en la esquina superior derecha del ícono
+     * según si este signo es el favorito activo del usuario.
+     */
+    private fun updateFavoriteBadge() {
+        if (::ivDetailFavoriteBadge.isInitialized && currentHoroscopeId.isNotEmpty()) {
+            val isFav = FavoriteManager.isFavorite(this, currentHoroscopeId)
+            ivDetailFavoriteBadge.visibility = if (isFav) View.VISIBLE else View.GONE
+        }
+    }
+
+    /**
      * Infla el menú superior (activity_detail_menu.xml) dentro de la Toolbar de detalle,
-     * actualiza el icono del corazón (relleno en rojo si es favorito, silueta si no lo es)
-     * y configura la opción del menú de idioma.
+     * actualiza el icono del corazón en la barra y configura la opción del menú de idioma.
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.activity_detail_menu, menu)
@@ -125,7 +143,7 @@ class DetailActivity : AppCompatActivity() {
      * Captura y procesa las opciones del menú seleccionadas por el usuario:
      * - Flecha Atrás: Regresa a MainActivity.
      * - Compartir: Inicia un Intent implícito (ACTION_SEND) para enviar la predicción a otras apps.
-     * - Favorito: Marca o desmarca este signo como el favorito (cambia el corazón entre rojo y silueta).
+     * - Favorito: Marca o desmarca este signo como el favorito del usuario.
      * - Idioma: Alterna dinámicamente el idioma de la aplicación (i18n).
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -152,11 +170,13 @@ class DetailActivity : AppCompatActivity() {
                     // Si ya era favorito, lo desmarca y elimina de SharedPreferences
                     FavoriteManager.clearFavorite(this)
                     item.setIcon(R.drawable.ic_heart_outline)
+                    updateFavoriteBadge()
                     showToast(getString(R.string.favorite_removed_message))
                 } else {
-                    // Si no era favorito, lo guarda como favorito y muestra el corazón relleno en rojo
+                    // Si no era favorito, lo guarda como favorito en SharedPreferences
                     FavoriteManager.saveFavorite(this, currentHoroscopeId)
                     item.setIcon(R.drawable.ic_heart_filled)
+                    updateFavoriteBadge()
                     val name = horoscope?.name?.let { getString(it) } ?: currentHoroscopeId
                     showToast("$name ${getString(R.string.favorite_set_success)}")
                 }

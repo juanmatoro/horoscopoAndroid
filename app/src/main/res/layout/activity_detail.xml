@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/light_turquoise"
-    tools:context=".DetailActivity">
+    tools:context=".activities.DetailActivity">
 
     <!-- MaterialToolbar superior que contiene el botón de regreso (flecha atrás) y el menú de idioma -->
     <com.google.android.material.appbar.MaterialToolbar
@@ -42,12 +42,28 @@
             android:orientation="vertical"
             android:padding="24dp">
 
-            <!-- Ícono grande del signo -->
-            <ImageView
-                android:id="@+id/ivDetailIcon"
+            <!-- FrameLayout contenedor del ícono grande y el corazón pequeño superpuesto en la esquina superior derecha -->
+            <FrameLayout
                 android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:contentDescription="@null" />
+                android:layout_height="80dp">
+
+                <!-- Ícono grande del signo -->
+                <ImageView
+                    android:id="@+id/ivDetailIcon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@null" />
+
+                <!-- Corazón pequeño superpuesto en la esquina superior derecha al ser favorito -->
+                <ImageView
+                    android:id="@+id/ivDetailFavoriteBadge"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_gravity="top|end"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_heart_filled"
+                    android:visibility="gone" />
+            </FrameLayout>
 
             <!-- Nombre del signo -->
             <TextView

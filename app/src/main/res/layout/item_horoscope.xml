@@ -20,12 +20,28 @@
         android:orientation="horizontal"
         android:padding="16dp">
 
-        <!-- Ícono del signo del horóscopo -->
-        <ImageView
-            android:id="@+id/ivIcon"
+        <!-- FrameLayout contenedor que superpone un corazón pequeño en la esquina superior derecha del ícono -->
+        <FrameLayout
             android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:contentDescription="@null" />
+            android:layout_height="56dp">
+
+            <!-- Ícono principal del signo del horóscopo -->
+            <ImageView
+                android:id="@+id/ivIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null" />
+
+            <!-- Indicador visual de corazón pequeño superpuesto en la esquina superior derecha -->
+            <ImageView
+                android:id="@+id/ivFavoriteIndicator"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="top|end"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_heart_filled"
+                android:visibility="gone" />
+        </FrameLayout>
 
         <!-- Contenedor vertical para el nombre, las fechas y la nota del elemento -->
         <LinearLayout
@@ -62,16 +78,6 @@
                 android:textSize="12sp"
                 android:textStyle="italic" />
         </LinearLayout>
-
-        <!-- Indicador visual de corazón relleno visible únicamente cuando el signo es el favorito activo -->
-        <ImageView
-            android:id="@+id/ivFavoriteIndicator"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_marginStart="8dp"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_heart_filled"
-            android:visibility="gone" />
 
     </LinearLayout>
 
