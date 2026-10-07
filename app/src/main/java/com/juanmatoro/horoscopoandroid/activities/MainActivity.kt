@@ -71,11 +71,14 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Al volver a la pantalla principal (ej. desde DetailActivity), refresca el menú superior
-     * para asegurar que el icono del corazón refleje dinámicamente si el usuario tiene o no un favorito guardado.
+     * y el adaptador de la lista para reflejar dinámicamente si el usuario marcó un nuevo favorito.
      */
     override fun onResume() {
         super.onResume()
         invalidateOptionsMenu() // Fuerza la actualización de las opciones del menú superior
+        if (::adapter.isInitialized) {
+            adapter.notifyDataSetChanged() // Notifica al RecyclerView para actualizar los corazones de las celdas
+        }
     }
 
     /**

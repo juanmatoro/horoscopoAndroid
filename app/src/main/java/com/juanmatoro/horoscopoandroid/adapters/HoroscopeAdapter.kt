@@ -9,6 +9,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.juanmatoro.horoscopoandroid.R
+import com.juanmatoro.horoscopoandroid.data.FavoriteManager
 import com.juanmatoro.horoscopoandroid.data.Horoscope
 
 /**
@@ -28,16 +29,18 @@ class HoroscopeAdapter(
      * de un solo elemento (item) de la lista.
      */
     class HoroscopeViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        // Referencia al contenedor CardView para cambiar el color de fondo y detectar pulsaciones
+        // Referencias a los componentes visuales de la tarjeta
         private val cardContainer: CardView = view.findViewById(R.id.cardContainer)
         private val ivIcon: ImageView = view.findViewById(R.id.ivIcon)
         private val tvName: TextView = view.findViewById(R.id.tvName)
         private val tvDates: TextView = view.findViewById(R.id.tvDates)
         private val tvDescription: TextView = view.findViewById(R.id.tvDescription)
+        private val ivFavoriteIndicator: ImageView = view.findViewById(R.id.ivFavoriteIndicator)
 
         /**
-         * Asigna los datos de un [Horoscope] a las vistas correspondientes
-         * y configura la captura del evento de pulsación/clic sobre la celda.
+         * Asigna los datos de un [Horoscope] a las vistas correspondientes,
+         * muestra el corazón de favorito si este signo está guardado en SharedPreferences
+         * y configura la captura del evento de pulsación sobre la celda.
          */
         fun render(horoscope: Horoscope, onHoroscopeSelected: (Horoscope) -> Unit) {
             val context = itemView.context
@@ -53,6 +56,15 @@ class HoroscopeAdapter(
             // Asignación del color del elemento (Fuego, Tierra, Aire, Agua)
             val color = ContextCompat.getColor(context, horoscope.type.colorRes)
             cardContainer.setCardBackgroundColor(color)
+
+            // Muestra u oculta el corazón relleno en rojo según si este signo es el favorito guardado
+            val isFavorite = FavoriteManager.isFavorite(context, horoscope.id)
+            if (isFavorite) {
+                ivFavoriteIndicator.visibility = View.VISIBLE
+                ivFavoriteIndicator.setImageResource(R.drawable.ic_heart_filled)
+            } else {
+                ivFavoriteIndicator.visibility = View.GONE
+            }
 
             // Detección de la pulsación sobre la tarjeta para navegar al detalle
             cardContainer.setOnClickListener {
