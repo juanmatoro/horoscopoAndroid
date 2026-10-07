@@ -70,13 +70,32 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
+     * Al volver a la pantalla principal (ej. desde DetailActivity), refresca el menú superior
+     * para asegurar que el icono del corazón refleje dinámicamente si el usuario tiene o no un favorito guardado.
+     */
+    override fun onResume() {
+        super.onResume()
+        invalidateOptionsMenu() // Fuerza la actualización de las opciones del menú superior
+    }
+
+    /**
      * Infla el menú superior (activity_main_menu.xml) en la Toolbar, configura
-     * los listeners con logs para el SearchView y ajusta el indicador de idioma activo (i18n).
+     * el icono del corazón (relleno en rojo si hay favorito, silueta si no lo hay),
+     * los listeners con logs para el SearchView y el indicador de idioma activo (i18n).
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.activity_main_menu, menu)
 
-        // 1. Configuración del SearchView interactivo e inserción de logs para monitorear pulsaciones
+        // 1. Configuración del icono del corazón según si el usuario tiene un favorito guardado
+        val favoriteItem = menu.findItem(R.id.action_favorite)
+        if (favoriteItem != null) {
+            val hasFavorite = FavoriteManager.getFavorite(this) != null
+            favoriteItem.setIcon(
+                if (hasFavorite) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline
+            )
+        }
+
+        // 2. Configuración del SearchView interactivo e inserción de logs para monitorear pulsaciones
         val searchItem = menu.findItem(R.id.action_search)
 
         // Listener para detectar cuándo se despliega/expande o colapsa el buscador en la barra
@@ -109,7 +128,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        // 2. Configura la opción de idioma mostrando la bandera/idioma al que se cambiará (UX)
+        // 3. Configura la opción de idioma mostrando la bandera/idioma al que se cambiará (UX)
         val languageItem = menu.findItem(R.id.action_language)
         if (languageItem != null) {
             val currentLocales = AppCompatDelegate.getApplicationLocales()

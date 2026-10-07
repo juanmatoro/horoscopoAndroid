@@ -2,7 +2,7 @@
 <!--
   MENÚ SUPERIOR DE LA PANTALLA PRINCIPAL (MainActivity)
   1. Opción de búsqueda con SearchView interactivo.
-  2. Opción para ver el horóscopo favorito del usuario (icono de estrella).
+  2. Opción para ver el horóscopo favorito del usuario (icono de corazón, relleno en rojo si hay favorito, silueta si no lo hay).
   3. Botón de cambio de idioma (i18n / Material Design).
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
@@ -16,10 +16,10 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|ifRoom" />
 
-    <!-- Acción para ver el Horóscopo Favorito del Usuario -->
+    <!-- Acción para ver el Horóscopo Favorito del Usuario (Ícono Corazón Silueta por defecto) -->
     <item
         android:id="@+id/action_favorite"
-        android:icon="@android:drawable/btn_star_big_on"
+        android:icon="@drawable/ic_heart_outline"
         android:title="@string/action_favorite"
         app:showAsAction="ifRoom" />
 

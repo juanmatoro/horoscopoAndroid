@@ -2,7 +2,7 @@
 <!--
   MENÚ SUPERIOR DE LA PANTALLA DE DETALLE (DetailActivity)
   1. Opción para compartir la predicción del horóscopo con otras aplicaciones.
-  2. Opción para marcar/desmarcar este horóscopo como favorito.
+  2. Opción para marcar/desmarcar este horóscopo como favorito (ícono de corazón).
   3. Opción de cambio de idioma en la barra superior.
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
@@ -15,10 +15,10 @@
         android:title="@string/action_share"
         app:showAsAction="ifRoom" />
 
-    <!-- Acción para Marcar/Desmarcar como Favorito -->
+    <!-- Acción para Marcar/Desmarcar como Favorito (Ícono Corazón) -->
     <item
         android:id="@+id/action_favorite"
-        android:icon="@android:drawable/btn_star_big_off"
+        android:icon="@drawable/ic_heart_outline"
         android:title="@string/action_favorite"
         app:showAsAction="ifRoom" />
 

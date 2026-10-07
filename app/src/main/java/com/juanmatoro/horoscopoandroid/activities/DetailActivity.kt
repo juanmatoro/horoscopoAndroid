@@ -23,7 +23,7 @@ import com.juanmatoro.horoscopoandroid.utils.showToast
 
 /**
  * Pantalla de detalle que muestra la información completa del signo del horóscopo seleccionado,
- * permite marcar o desmarcar dicho signo como favorito y compartir su contenido con otras aplicaciones.
+ * permite marcar o desmarcar dicho signo como favorito (ícono de corazón) y compartir su contenido con otras aplicaciones.
  */
 class DetailActivity : AppCompatActivity() {
 
@@ -87,18 +87,18 @@ class DetailActivity : AppCompatActivity() {
 
     /**
      * Infla el menú superior (activity_detail_menu.xml) dentro de la Toolbar de detalle,
-     * actualiza el icono de la estrella según si este signo es el favorito guardado
+     * actualiza el icono del corazón (relleno en rojo si es favorito, silueta si no lo es)
      * y configura la opción del menú de idioma.
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.activity_detail_menu, menu)
 
-        // 1. Actualiza el icono de la estrella si este signo ya es el favorito del usuario
+        // 1. Actualiza el icono del corazón según si este signo es el favorito guardado del usuario
         val favoriteItem = menu.findItem(R.id.action_favorite)
         if (favoriteItem != null && currentHoroscopeId.isNotEmpty()) {
             val isFav = FavoriteManager.isFavorite(this, currentHoroscopeId)
             favoriteItem.setIcon(
-                if (isFav) android.R.drawable.btn_star_big_on else android.R.drawable.btn_star_big_off
+                if (isFav) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline
             )
         }
 
@@ -125,7 +125,7 @@ class DetailActivity : AppCompatActivity() {
      * Captura y procesa las opciones del menú seleccionadas por el usuario:
      * - Flecha Atrás: Regresa a MainActivity.
      * - Compartir: Inicia un Intent implícito (ACTION_SEND) para enviar la predicción a otras apps.
-     * - Favorito: Marca o desmarca este signo como el favorito del usuario.
+     * - Favorito: Marca o desmarca este signo como el favorito (cambia el corazón entre rojo y silueta).
      * - Idioma: Alterna dinámicamente el idioma de la aplicación (i18n).
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -151,12 +151,12 @@ class DetailActivity : AppCompatActivity() {
                 if (isCurrentlyFavorite) {
                     // Si ya era favorito, lo desmarca y elimina de SharedPreferences
                     FavoriteManager.clearFavorite(this)
-                    item.setIcon(android.R.drawable.btn_star_big_off)
+                    item.setIcon(R.drawable.ic_heart_outline)
                     showToast(getString(R.string.favorite_removed_message))
                 } else {
-                    // Si no era favorito, lo guarda como favorito en SharedPreferences
+                    // Si no era favorito, lo guarda como favorito y muestra el corazón relleno en rojo
                     FavoriteManager.saveFavorite(this, currentHoroscopeId)
-                    item.setIcon(android.R.drawable.btn_star_big_on)
+                    item.setIcon(R.drawable.ic_heart_filled)
                     val name = horoscope?.name?.let { getString(it) } ?: currentHoroscopeId
                     showToast("$name ${getString(R.string.favorite_set_success)}")
                 }
