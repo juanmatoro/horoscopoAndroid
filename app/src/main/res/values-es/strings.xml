@@ -21,6 +21,11 @@
     <string name="action_share">Compartir</string>
     <string name="share_title">Compartir Horóscopo</string>
 
+    <!-- Selectores de periodo -->
+    <string name="period_daily">Diario</string>
+    <string name="period_weekly">Semanal</string>
+    <string name="period_monthly">Mensual</string>
+
     <!-- Mensajes de estado de la API REST en español -->
     <string name="status_api_updated">Predicción actualizada de la API en vivo</string>
     <string name="status_api_outdated">La fecha de la API difiere de la del dispositivo. Mostrando predicción guardada.</string>

@@ -18,21 +18,23 @@ import androidx.core.os.LocaleListCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.juanmatoro.horoscopoandroid.R
 import com.juanmatoro.horoscopoandroid.data.FavoriteManager
 import com.juanmatoro.horoscopoandroid.data.Horoscope
 import com.juanmatoro.horoscopoandroid.data.HoroscopeProvider
+import com.juanmatoro.horoscopoandroid.data.api.HoroscopePeriod
 import com.juanmatoro.horoscopoandroid.data.api.RetrofitClient
-import com.juanmatoro.horoscopoandroid.utils.DateUtils
 import com.juanmatoro.horoscopoandroid.utils.TranslationManager
 import com.juanmatoro.horoscopoandroid.utils.showToast
 import kotlinx.coroutines.launch
 
 /**
  * Pantalla de detalle que muestra la información completa del signo del horóscopo seleccionado,
- * consulta la predicción actualizada en vivo desde la API REST freehoroscopeapi.com,
+ * permite cambiar entre predicción Diaria, Semanal o Mensual mediante botones interactivos,
+ * consulta la API REST freehoroscopeapi.com en tiempo real,
  * traduce automáticamente el texto al español en el dispositivo mediante Google ML Kit,
- * compara la fecha del servidor con la del dispositivo, permite marcar el signo como favorito y compartir.
+ * permite marcar el signo como favorito y compartir su contenido con otras aplicaciones.
  */
 class DetailActivity : AppCompatActivity() {
 
@@ -49,6 +51,7 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var tvApiStatus: TextView
     private lateinit var tvDetailText: TextView
+    private lateinit var toggleButtonPeriod: MaterialButtonToggleGroup
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,6 +87,7 @@ class DetailActivity : AppCompatActivity() {
             tvDetailText = findViewById(R.id.tvDetailText)
             progressBar = findViewById(R.id.progressBar)
             tvApiStatus = findViewById(R.id.tvApiStatus)
+            toggleButtonPeriod = findViewById(R.id.toggleButtonPeriod)
 
             // Asignar el nombre del signo como título de la Toolbar
             supportActionBar?.title = getString(horoscope.name)
@@ -102,21 +106,33 @@ class DetailActivity : AppCompatActivity() {
             val color = ContextCompat.getColor(this, horoscope.type.colorRes)
             cardHeader.setCardBackgroundColor(color)
 
-            // 5. Consultar la predicción del horóscopo en tiempo real desde la API REST y traducir en el dispositivo
-            fetchHoroscopeFromApi(horoscope)
+            // Configuración del listener para alternar entre el periodo Diario, Semanal o Mensual
+            toggleButtonPeriod.addOnButtonCheckedListener { _, checkedId, isChecked ->
+                if (isChecked) {
+                    val selectedPeriod = when (checkedId) {
+                        R.id.btnPeriodWeekly -> HoroscopePeriod.WEEKLY
+                        R.id.btnPeriodMonthly -> HoroscopePeriod.MONTHLY
+                        else -> HoroscopePeriod.DAILY
+                    }
+                    fetchHoroscopeFromApi(horoscope, selectedPeriod)
+                }
+            }
+
+            // 5. Consultar la predicción inicial (Diaria) desde la API REST y traducir On-Device
+            fetchHoroscopeFromApi(horoscope, HoroscopePeriod.DAILY)
         } else {
             finish()
         }
     }
 
     /**
-     * Realiza una llamada asíncrona a la API REST de freehoroscopeapi.com mediante Corrutinas.
-     * Compara la fecha devuelta por el servidor con la fecha actual del dispositivo.
-     * Si las fechas coinciden y el idioma de la app es Español, traduce el texto en el dispositivo usando Google ML Kit.
+     * Realiza una llamada asíncrona a la API REST para el periodo seleccionado (Diario, Semanal, Mensual).
+     * Si el idioma activo es Español, traduce el texto devuelto en el dispositivo usando Google ML Kit.
      *
      * @param horoscope Objeto Horoscope del signo actual.
+     * @param period Periodo a consultar ([HoroscopePeriod.DAILY], [HoroscopePeriod.WEEKLY], [HoroscopePeriod.MONTHLY]).
      */
-    private fun fetchHoroscopeFromApi(horoscope: Horoscope) {
+    private fun fetchHoroscopeFromApi(horoscope: Horoscope, period: HoroscopePeriod = HoroscopePeriod.DAILY) {
         // Muestra el indicador de carga ProgressBar
         progressBar.visibility = View.VISIBLE
         tvApiStatus.visibility = View.GONE
@@ -124,19 +140,19 @@ class DetailActivity : AppCompatActivity() {
         // Corrutina vinculada al ciclo de vida de la Activity
         lifecycleScope.launch {
             try {
-                // Petición de red asíncrona a la API REST
-                val response = RetrofitClient.apiService.getDailyHoroscope(horoscope.id)
+                // Petición de red asíncrona según el periodo seleccionado
+                val response = when (period) {
+                    HoroscopePeriod.DAILY -> RetrofitClient.apiService.getDailyHoroscope(horoscope.id)
+                    HoroscopePeriod.WEEKLY -> RetrofitClient.apiService.getWeeklyHoroscope(horoscope.id)
+                    HoroscopePeriod.MONTHLY -> RetrofitClient.apiService.getMonthlyHoroscope(horoscope.id)
+                }
 
                 if (response.isSuccessful && response.body()?.data != null) {
                     val apiData = response.body()!!.data!!
                     val apiDate = apiData.date.orEmpty()
                     val rawPrediction = apiData.horoscope.orEmpty()
 
-                    // Obtener la fecha actual del dispositivo en formato ISO ("yyyy-MM-dd")
-                    val currentDate = DateUtils.getCurrentFormattedDate("yyyy-MM-dd")
-
-                    // Validación de frescura: Comparamos la fecha del dispositivo con la fecha de la API
-                    if (apiDate == currentDate && rawPrediction.isNotEmpty()) {
+                    if (rawPrediction.isNotEmpty()) {
                         // Detectar el idioma actual de la aplicación (i18n)
                         val currentLocales = AppCompatDelegate.getApplicationLocales()
                         val currentLanguage = if (currentLocales.isEmpty) {
@@ -152,22 +168,18 @@ class DetailActivity : AppCompatActivity() {
                             rawPrediction
                         }
 
-                        // Las fechas coinciden: Mostramos la predicción traducida en vivo
+                        // Mostramos la predicción traducida en vivo
                         tvDetailText.text = finalPrediction
                         tvApiStatus.text = "🟢 ${getString(R.string.status_api_updated)} ($apiDate)"
                     } else {
-                        // Las fechas no coinciden exactamente: Mostramos aviso y mantenemos la predicción guardada
                         tvApiStatus.text = "🟡 ${getString(R.string.status_api_outdated)}"
                     }
                 } else {
-                    // La API respondió con un error HTTP: Mostramos aviso de respaldo
                     tvApiStatus.text = "⚪ ${getString(R.string.status_api_offline)}"
                 }
             } catch (e: Exception) {
-                // Error de red (sin conexión a internet, tiempo de espera agotado, etc.)
                 tvApiStatus.text = "⚪ ${getString(R.string.status_api_offline)}"
             } finally {
-                // Oculta el ProgressBar de carga y hace visible la etiqueta de estado de la API
                 progressBar.visibility = View.GONE
                 tvApiStatus.visibility = View.VISIBLE
             }

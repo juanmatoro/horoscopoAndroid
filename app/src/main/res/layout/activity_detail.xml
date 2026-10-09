@@ -96,16 +96,70 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- Selector de periodo (Diario, Semanal, Mensual) con botones de alto contraste -->
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/toggleButtonPeriod"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:checkedButton="@id/btnPeriodDaily"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardHeader"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPeriodDaily"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/period_daily"
+            android:textColor="@color/toggle_button_text"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/toggle_button_background"
+            app:strokeColor="@color/toggle_button_stroke"
+            app:strokeWidth="1.5dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPeriodWeekly"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/period_weekly"
+            android:textColor="@color/toggle_button_text"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/toggle_button_background"
+            app:strokeColor="@color/toggle_button_stroke"
+            app:strokeWidth="1.5dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPeriodMonthly"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/period_monthly"
+            android:textColor="@color/toggle_button_text"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/toggle_button_background"
+            app:strokeColor="@color/toggle_button_stroke"
+            app:strokeWidth="1.5dp" />
+
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
     <!-- Indicador de progreso durante la consulta a la API REST de horóscopos -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="8dp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardHeader" />
+        app:layout_constraintTop_toBottomOf="@id/toggleButtonPeriod" />
 
     <!-- Etiqueta de estado que indica la verificación de fecha entre el dispositivo y la API -->
     <TextView
@@ -113,7 +167,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="6dp"
         android:layout_marginEnd="20dp"
         android:textColor="#00796B"
         android:textSize="12sp"

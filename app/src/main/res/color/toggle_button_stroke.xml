@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Selector de color de borde para los botones de periodo con alto contraste -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="#004D40" />
+</selector>

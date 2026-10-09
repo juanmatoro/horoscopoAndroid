@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Selector de color de fondo para los botones de periodo con alto contraste -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Botón seleccionado: Fondo turquesa muy oscuro (#004D40) -->
+    <item android:color="#004D40" android:state_checked="true" />
+    <!-- Botón no seleccionado: Fondo blanco (#FFFFFF) -->
+    <item android:color="#FFFFFF" />
+</selector>
