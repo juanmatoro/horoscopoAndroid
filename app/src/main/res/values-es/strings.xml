@@ -21,6 +21,11 @@
     <string name="action_share">Compartir</string>
     <string name="share_title">Compartir Horóscopo</string>
 
+    <!-- Mensajes de estado de la API REST en español -->
+    <string name="status_api_updated">Predicción actualizada de la API en vivo</string>
+    <string name="status_api_outdated">La fecha de la API difiere de la del dispositivo. Mostrando predicción guardada.</string>
+    <string name="status_api_offline">Sin conexión o error de red. Mostrando predicción guardada.</string>
+
     <!-- Nombres de los signos en español -->
     <string name="horoscope_name_aries">Aries</string>
     <string name="horoscope_name_taurus">Tauro</string>

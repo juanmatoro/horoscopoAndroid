@@ -6,6 +6,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -16,15 +17,20 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.LocaleListCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.juanmatoro.horoscopoandroid.R
 import com.juanmatoro.horoscopoandroid.data.FavoriteManager
 import com.juanmatoro.horoscopoandroid.data.Horoscope
 import com.juanmatoro.horoscopoandroid.data.HoroscopeProvider
+import com.juanmatoro.horoscopoandroid.data.api.RetrofitClient
+import com.juanmatoro.horoscopoandroid.utils.DateUtils
 import com.juanmatoro.horoscopoandroid.utils.showToast
+import kotlinx.coroutines.launch
 
 /**
  * Pantalla de detalle que muestra la información completa del signo del horóscopo seleccionado,
- * permite marcar o desmarcar dicho signo como favorito (ícono de corazón) y compartir su contenido con otras aplicaciones.
+ * consulta la predicción actualizada en vivo desde la API REST freehoroscopeapi.com,
+ * compara la fecha del servidor con la del dispositivo, permite marcar el signo como favorito y compartir.
  */
 class DetailActivity : AppCompatActivity() {
 
@@ -36,8 +42,11 @@ class DetailActivity : AppCompatActivity() {
     // Guardamos la referencia del ID del signo actual en esta pantalla
     private var currentHoroscopeId: String = ""
 
-    // Referencia al badge de corazón pequeño en la esquina superior derecha de la imagen de cabecera
+    // Referencias a los componentes de la interfaz
     private lateinit var ivDetailFavoriteBadge: ImageView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var tvApiStatus: TextView
+    private lateinit var tvDetailText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,12 +79,14 @@ class DetailActivity : AppCompatActivity() {
             val tvDetailName: TextView = findViewById(R.id.tvDetailName)
             val tvDetailDates: TextView = findViewById(R.id.tvDetailDates)
             val tvDetailElement: TextView = findViewById(R.id.tvDetailElement)
-            val tvDetailText: TextView = findViewById(R.id.tvDetailText)
+            tvDetailText = findViewById(R.id.tvDetailText)
+            progressBar = findViewById(R.id.progressBar)
+            tvApiStatus = findViewById(R.id.tvApiStatus)
 
             // Asignar el nombre del signo como título de la Toolbar
             supportActionBar?.title = getString(horoscope.name)
 
-            // 4. Asignar los datos del signo seleccionado
+            // 4. Asignar inicialmente los datos locales predeterminados
             tvDetailName.text = getString(horoscope.name)
             tvDetailDates.text = getString(horoscope.dates)
             tvDetailElement.text = getString(horoscope.type.descriptionRes)
@@ -88,8 +99,61 @@ class DetailActivity : AppCompatActivity() {
             // Asignar el color del elemento a la tarjeta de cabecera
             val color = ContextCompat.getColor(this, horoscope.type.colorRes)
             cardHeader.setCardBackgroundColor(color)
+
+            // 5. Consultar la predicción del horóscopo en tiempo real desde la API REST (Retrofit + Coroutines)
+            fetchHoroscopeFromApi(horoscope)
         } else {
             finish()
+        }
+    }
+
+    /**
+     * Realiza una llamada asíncrona a la API REST de freehoroscopeapi.com mediante Corrutinas.
+     * Compara la fecha devuelta por el servidor con la fecha actual del dispositivo.
+     * Si las fechas coinciden, actualiza el texto con la predicción en vivo de la API.
+     *
+     * @param horoscope Objeto Horoscope del signo actual.
+     */
+    private fun fetchHoroscopeFromApi(horoscope: Horoscope) {
+        // Muestra el indicador de carga ProgressBar
+        progressBar.visibility = View.VISIBLE
+        tvApiStatus.visibility = View.GONE
+
+        // Corrutina vinculada al ciclo de vida de la Activity
+        lifecycleScope.launch {
+            try {
+                // Petición de red asíncrona a la API REST
+                val response = RetrofitClient.apiService.getDailyHoroscope(horoscope.id)
+
+                if (response.isSuccessful && response.body()?.data != null) {
+                    val apiData = response.body()!!.data!!
+                    val apiDate = apiData.date.orEmpty()
+                    val apiPrediction = apiData.horoscope.orEmpty()
+
+                    // Obtener la fecha actual del dispositivo en formato ISO ("yyyy-MM-dd")
+                    val currentDate = DateUtils.getCurrentFormattedDate("yyyy-MM-dd")
+
+                    // Validación de frescura: Comparamos la fecha del dispositivo con la fecha de la API
+                    if (apiDate == currentDate && apiPrediction.isNotEmpty()) {
+                        // Las fechas coinciden: Mostramos la predicción en vivo de la API
+                        tvDetailText.text = apiPrediction
+                        tvApiStatus.text = "🟢 ${getString(R.string.status_api_updated)} ($apiDate)"
+                    } else {
+                        // Las fechas no coinciden exactamente: Mostramos aviso y mantenemos la predicción guardada
+                        tvApiStatus.text = "🟡 ${getString(R.string.status_api_outdated)}"
+                    }
+                } else {
+                    // La API respondió con un error HTTP: Mostramos aviso de respaldo
+                    tvApiStatus.text = "⚪ ${getString(R.string.status_api_offline)}"
+                }
+            } catch (e: Exception) {
+                // Error de red (sin conexión a internet, tiempo de espera agotado, etc.)
+                tvApiStatus.text = "⚪ ${getString(R.string.status_api_offline)}"
+            } finally {
+                // Oculta el ProgressBar de carga y hace visible la etiqueta de estado de la API
+                progressBar.visibility = View.GONE
+                tvApiStatus.visibility = View.VISIBLE
+            }
         }
     }
 
@@ -208,7 +272,7 @@ class DetailActivity : AppCompatActivity() {
     private fun shareHoroscope(horoscope: Horoscope) {
         val name = getString(horoscope.name)
         val dates = getString(horoscope.dates)
-        val detail = getString(horoscope.detail)
+        val detail = tvDetailText.text.toString()
 
         // Formateo del mensaje estructurado a compartir
         val shareText = "✨ $name ($dates) ✨\n\n$detail\n\n- ${getString(R.string.app_name)}"
