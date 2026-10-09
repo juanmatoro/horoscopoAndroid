@@ -1,6 +1,6 @@
-# Guía de Conexión a API REST con Retrofit, Gson y Corrutinas en Android
+# Guía de Conexión a API REST con Retrofit, Gson y Traducción On-Device con Google ML Kit
 
-Esta guía explica paso a paso cómo conectar una aplicación Android a una API REST externa (**freehoroscopeapi.com**), deserializar las respuestas JSON y validar la frescura de los datos comparando fechas.
+Esta guía explica paso a paso cómo conectar una aplicación Android a una API REST externa (**freehoroscopeapi.com**), deserializar respuestas JSON, traducir dinámicamente el contenido en el dispositivo con Google ML Kit y validar la frescura de los datos comparando fechas.
 
 ---
 
@@ -10,6 +10,7 @@ Esta guía explica paso a paso cómo conectar una aplicación Android a una API 
 2. **Retrofit**: La librería estándar en Android para realizar peticiones HTTP de forma rápida, limpia y segura.
 3. **Gson**: Librería convertidora que transforma automáticamente las cadenas JSON en objetos Kotlin (`Data Classes`).
 4. **Corrutinas (`suspend`)**: Mecanismo de Kotlin para ejecutar tareas asíncronas de red en segundo plano sin congelar o bloquear la pantalla principal (*UI Thread*).
+5. **Google ML Kit On-Device Translation**: Librería oficial de Google para traducir texto de un idioma a otro directamente en el procesador del teléfono de forma gratuita y sin servidores.
 
 ---
 
@@ -100,9 +101,9 @@ object RetrofitClient {
 
 ---
 
-### Paso 5: Consultar la API y Validar la Fecha (`DetailActivity.kt`)
+### Paso 5: Consultar la API, Traducir en el Dispositivo y Validar la Fecha (`DetailActivity.kt`)
 
-Ejecutamos la petición dentro de una corrutina y comparamos la fecha del dispositivo con la devuelta por la API:
+Ejecutamos la petición dentro de una corrutina, traducimos al español con Google ML Kit si el idioma activo es Español y comparamos la fecha del dispositivo con la devuelta por la API:
 
 ```kotlin
 private fun fetchHoroscopeFromApi(horoscope: Horoscope) {
@@ -116,26 +117,74 @@ private fun fetchHoroscopeFromApi(horoscope: Horoscope) {
             if (response.isSuccessful && response.body()?.data != null) {
                 val apiData = response.body()!!.data!!
                 val apiDate = apiData.date.orEmpty()
-                val apiPrediction = apiData.horoscope.orEmpty()
+                val rawPrediction = apiData.horoscope.orEmpty()
 
                 // Obtener fecha actual del dispositivo (ej. "2026-10-09")
                 val currentDate = DateUtils.getCurrentFormattedDate("yyyy-MM-dd")
 
                 // Validación de frescura: Comparamos fechas
-                if (apiDate == currentDate && apiPrediction.isNotEmpty()) {
-                    // Datos al día: Mostramos la predicción de la API
-                    tvDetailText.text = apiPrediction
+                if (apiDate == currentDate && rawPrediction.isNotEmpty()) {
+                    val currentLocales = AppCompatDelegate.getApplicationLocales()
+                    val currentLanguage = if (currentLocales.isEmpty) {
+                        resources.configuration.locales[0]?.language ?: "en"
+                    } else {
+                        currentLocales[0]?.language ?: "en"
+                    }
+
+                    // Si la app está en español, traducimos On-Device con Google ML Kit
+                    val finalPrediction = if (currentLanguage == "es") {
+                        TranslationManager.translateEnToEs(rawPrediction)
+                    } else {
+                        rawPrediction
+                    }
+
+                    tvDetailText.text = finalPrediction
                     tvApiStatus.text = "🟢 Predicción actualizada de la API ($apiDate)"
                 } else {
-                    // Fecha desactualizada: Mantenemos la predicción guardada
                     tvApiStatus.text = "🟡 La fecha de la API difiere de la del dispositivo."
                 }
             }
         } catch (e: Exception) {
-            // Error de conexión o red: Mantenemos la predicción guardada
             tvApiStatus.text = "⚪ Sin conexión a la API. Mostrando datos locales."
         } finally {
             progressBar.visibility = View.GONE
+        }
+    }
+}
+```
+
+---
+
+## 3. Traducción On-Device en el Dispositivo (Google ML Kit)
+
+Dado que la API `freehoroscopeapi.com` devuelve la predicción **únicamente en inglés**, utilizamos la librería oficial **Google ML Kit On-Device Translation** (`com.google.mlkit:translate`) para traducir el texto al español en el propio teléfono del usuario de forma rápida, gratuita y privada.
+
+### Ventajas de la Traducción On-Device:
+1. **Totalmente Gratuita**: No requiere claves de API de pago ni cuotas de servidor.
+2. **Funcionamiento Local**: Tras descargar el modelo de lenguaje ligero la primera vez, traduce localmente en el procesador del teléfono.
+3. **Soporte Offline**: Una vez descargado el modelo, funciona incluso sin conexión a internet.
+
+### Implementación ([TranslationManager.kt](file:///Users/Mananas/Develops/horoscopo/app/src/main/java/com/juanmatoro/horoscopoandroid/utils/TranslationManager.kt))
+
+```kotlin
+object TranslationManager {
+
+    suspend fun translateEnToEs(text: String): String {
+        return try {
+            val options = TranslatorOptions.Builder()
+                .setSourceLanguage(TranslateLanguage.ENGLISH)
+                .setTargetLanguage(TranslateLanguage.SPANISH)
+                .build()
+
+            val translator = Translation.getClient(options)
+
+            // Descarga automática del modelo de idioma la primera vez
+            translator.downloadModelIfNeeded().await()
+
+            // Traduce el texto localmente en el dispositivo
+            translator.translate(text).await()
+        } catch (e: Exception) {
+            text // Si falla, devuelve el texto original en inglés
         }
     }
 }
@@ -166,6 +215,13 @@ private fun fetchHoroscopeFromApi(horoscope: Horoscope) {
       │                   │             [ aviso de modo fuera de línea ]
       │ Sí                │ No
       ▼                   ▼
-[ Actualiza texto      [ Mantiene texto local ]
-  de la predicción ]
+[ ¿Idioma app es Español ("es")? ]      [ Mantiene texto local ]
+      │                   │
+      │ Sí                │ No
+      ▼                   ▼
+[ Traduce On-Device    [ Muestra texto ]
+  con Google ML Kit ]   [ en inglés    ]
+      │
+      ▼
+[ Muestra predicción traducida en vivo ]
 ```

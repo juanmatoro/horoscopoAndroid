@@ -24,12 +24,14 @@ import com.juanmatoro.horoscopoandroid.data.Horoscope
 import com.juanmatoro.horoscopoandroid.data.HoroscopeProvider
 import com.juanmatoro.horoscopoandroid.data.api.RetrofitClient
 import com.juanmatoro.horoscopoandroid.utils.DateUtils
+import com.juanmatoro.horoscopoandroid.utils.TranslationManager
 import com.juanmatoro.horoscopoandroid.utils.showToast
 import kotlinx.coroutines.launch
 
 /**
  * Pantalla de detalle que muestra la información completa del signo del horóscopo seleccionado,
  * consulta la predicción actualizada en vivo desde la API REST freehoroscopeapi.com,
+ * traduce automáticamente el texto al español en el dispositivo mediante Google ML Kit,
  * compara la fecha del servidor con la del dispositivo, permite marcar el signo como favorito y compartir.
  */
 class DetailActivity : AppCompatActivity() {
@@ -100,7 +102,7 @@ class DetailActivity : AppCompatActivity() {
             val color = ContextCompat.getColor(this, horoscope.type.colorRes)
             cardHeader.setCardBackgroundColor(color)
 
-            // 5. Consultar la predicción del horóscopo en tiempo real desde la API REST (Retrofit + Coroutines)
+            // 5. Consultar la predicción del horóscopo en tiempo real desde la API REST y traducir en el dispositivo
             fetchHoroscopeFromApi(horoscope)
         } else {
             finish()
@@ -110,7 +112,7 @@ class DetailActivity : AppCompatActivity() {
     /**
      * Realiza una llamada asíncrona a la API REST de freehoroscopeapi.com mediante Corrutinas.
      * Compara la fecha devuelta por el servidor con la fecha actual del dispositivo.
-     * Si las fechas coinciden, actualiza el texto con la predicción en vivo de la API.
+     * Si las fechas coinciden y el idioma de la app es Español, traduce el texto en el dispositivo usando Google ML Kit.
      *
      * @param horoscope Objeto Horoscope del signo actual.
      */
@@ -128,15 +130,30 @@ class DetailActivity : AppCompatActivity() {
                 if (response.isSuccessful && response.body()?.data != null) {
                     val apiData = response.body()!!.data!!
                     val apiDate = apiData.date.orEmpty()
-                    val apiPrediction = apiData.horoscope.orEmpty()
+                    val rawPrediction = apiData.horoscope.orEmpty()
 
                     // Obtener la fecha actual del dispositivo en formato ISO ("yyyy-MM-dd")
                     val currentDate = DateUtils.getCurrentFormattedDate("yyyy-MM-dd")
 
                     // Validación de frescura: Comparamos la fecha del dispositivo con la fecha de la API
-                    if (apiDate == currentDate && apiPrediction.isNotEmpty()) {
-                        // Las fechas coinciden: Mostramos la predicción en vivo de la API
-                        tvDetailText.text = apiPrediction
+                    if (apiDate == currentDate && rawPrediction.isNotEmpty()) {
+                        // Detectar el idioma actual de la aplicación (i18n)
+                        val currentLocales = AppCompatDelegate.getApplicationLocales()
+                        val currentLanguage = if (currentLocales.isEmpty) {
+                            resources.configuration.locales[0]?.language ?: "en"
+                        } else {
+                            currentLocales[0]?.language ?: "en"
+                        }
+
+                        // Si el idioma activo es Español, traducimos On-Device con Google ML Kit
+                        val finalPrediction = if (currentLanguage == "es") {
+                            TranslationManager.translateEnToEs(rawPrediction)
+                        } else {
+                            rawPrediction
+                        }
+
+                        // Las fechas coinciden: Mostramos la predicción traducida en vivo
+                        tvDetailText.text = finalPrediction
                         tvApiStatus.text = "🟢 ${getString(R.string.status_api_updated)} ($apiDate)"
                     } else {
                         // Las fechas no coinciden exactamente: Mostramos aviso y mantenemos la predicción guardada
