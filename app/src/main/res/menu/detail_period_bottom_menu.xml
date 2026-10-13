@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MENÚ INFERIOR PARA DETAILACTIVITY (BottomNavigationView)
+  Permite al usuario cambiar el periodo de la predicción entre Diario, Semanal y Mensual.
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Opción de horóscopo diario -->
+    <item
+        android:id="@+id/nav_period_daily"
+        android:icon="@drawable/ic_calendar_day"
+        android:title="@string/period_daily" />
+
+    <!-- Opción de horóscopo semanal -->
+    <item
+        android:id="@+id/nav_period_weekly"
+        android:icon="@drawable/ic_calendar_week"
+        android:title="@string/period_weekly" />
+
+    <!-- Opción de horóscopo mensual -->
+    <item
+        android:id="@+id/nav_period_monthly"
+        android:icon="@drawable/ic_calendar_month"
+        android:title="@string/period_monthly" />
+
+</menu>

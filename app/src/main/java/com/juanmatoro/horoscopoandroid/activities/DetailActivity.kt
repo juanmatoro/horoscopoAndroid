@@ -18,7 +18,7 @@ import androidx.core.os.LocaleListCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.button.MaterialButtonToggleGroup
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.juanmatoro.horoscopoandroid.R
 import com.juanmatoro.horoscopoandroid.data.FavoriteManager
 import com.juanmatoro.horoscopoandroid.data.Horoscope
@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Pantalla de detalle que muestra la información completa del signo del horóscopo seleccionado,
- * permite cambiar entre predicción Diaria, Semanal o Mensual mediante botones interactivos,
+ * permite cambiar entre predicción Diaria, Semanal o Mensual mediante el menú inferior (BottomNavigationView),
  * consulta la API REST freehoroscopeapi.com en tiempo real,
  * traduce automáticamente el texto al español en el dispositivo mediante Google ML Kit,
  * permite marcar el signo como favorito y compartir su contenido con otras aplicaciones.
@@ -51,7 +51,7 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var tvApiStatus: TextView
     private lateinit var tvDetailText: TextView
-    private lateinit var toggleButtonPeriod: MaterialButtonToggleGroup
+    private lateinit var bottomNavigationViewPeriod: BottomNavigationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,7 +87,7 @@ class DetailActivity : AppCompatActivity() {
             tvDetailText = findViewById(R.id.tvDetailText)
             progressBar = findViewById(R.id.progressBar)
             tvApiStatus = findViewById(R.id.tvApiStatus)
-            toggleButtonPeriod = findViewById(R.id.toggleButtonPeriod)
+            bottomNavigationViewPeriod = findViewById(R.id.bottomNavigationViewPeriod)
 
             // Asignar el nombre del signo como título de la Toolbar
             supportActionBar?.title = getString(horoscope.name)
@@ -106,16 +106,15 @@ class DetailActivity : AppCompatActivity() {
             val color = ContextCompat.getColor(this, horoscope.type.colorRes)
             cardHeader.setCardBackgroundColor(color)
 
-            // Configuración del listener para alternar entre el periodo Diario, Semanal o Mensual
-            toggleButtonPeriod.addOnButtonCheckedListener { _, checkedId, isChecked ->
-                if (isChecked) {
-                    val selectedPeriod = when (checkedId) {
-                        R.id.btnPeriodWeekly -> HoroscopePeriod.WEEKLY
-                        R.id.btnPeriodMonthly -> HoroscopePeriod.MONTHLY
-                        else -> HoroscopePeriod.DAILY
-                    }
-                    fetchHoroscopeFromApi(horoscope, selectedPeriod)
+            // Configuración del listener para alternar entre el periodo Diario, Semanal o Mensual desde el BottomNavigationView
+            bottomNavigationViewPeriod.setOnItemSelectedListener { item ->
+                val selectedPeriod = when (item.itemId) {
+                    R.id.nav_period_weekly -> HoroscopePeriod.WEEKLY
+                    R.id.nav_period_monthly -> HoroscopePeriod.MONTHLY
+                    else -> HoroscopePeriod.DAILY
                 }
+                fetchHoroscopeFromApi(horoscope, selectedPeriod)
+                true
             }
 
             // 5. Consultar la predicción inicial (Diaria) desde la API REST y traducir On-Device
@@ -126,21 +125,27 @@ class DetailActivity : AppCompatActivity() {
     }
 
     /**
-     * Realiza una llamada asíncrona a la API REST para el periodo seleccionado (Diario, Semanal, Mensual).
-     * Si el idioma activo es Español, traduce el texto devuelto en el dispositivo usando Google ML Kit.
+     * Realiza una llamada asíncrona a la API REST para el periodo seleccionado (Diario, Semanal, Mensual) mediante Corrutinas.
+     *
+     * EXPLICACIÓN DE CORRUTINAS:
+     * 1. 'lifecycleScope.launch': Inicia una corrutina en el hilo principal (Main Thread), pero vinculada al ciclo
+     *    de vida de DetailActivity. Si el usuario abandona la pantalla, la corrutina se cancela automáticamente.
+     * 2. 'RetrofitClient.apiService.get*Horoscope()': Al ser funciones 'suspend', Retrofit traslada automáticamente la
+     *    petición de red a un hilo de E/S secundario (Dispatchers.IO) sin bloquear la interfaz visual.
+     * 3. 'TranslationManager.translateEnToEs()': Función 'suspend' que ejecuta la traducción local asíncrona con ML Kit.
      *
      * @param horoscope Objeto Horoscope del signo actual.
      * @param period Periodo a consultar ([HoroscopePeriod.DAILY], [HoroscopePeriod.WEEKLY], [HoroscopePeriod.MONTHLY]).
      */
     private fun fetchHoroscopeFromApi(horoscope: Horoscope, period: HoroscopePeriod = HoroscopePeriod.DAILY) {
-        // Muestra el indicador de carga ProgressBar
+        // Muestra el indicador de carga ProgressBar en la interfaz
         progressBar.visibility = View.VISIBLE
         tvApiStatus.visibility = View.GONE
 
-        // Corrutina vinculada al ciclo de vida de la Activity
+        // INICIO DE CORRUTINA: 'lifecycleScope.launch' crea un ámbito asíncrono seguro
         lifecycleScope.launch {
             try {
-                // Petición de red asíncrona según el periodo seleccionado
+                // SUSPENSIÓN #1: Petición de red asíncrona no bloqueante
                 val response = when (period) {
                     HoroscopePeriod.DAILY -> RetrofitClient.apiService.getDailyHoroscope(horoscope.id)
                     HoroscopePeriod.WEEKLY -> RetrofitClient.apiService.getWeeklyHoroscope(horoscope.id)
@@ -161,14 +166,14 @@ class DetailActivity : AppCompatActivity() {
                             currentLocales[0]?.language ?: "en"
                         }
 
-                        // Si el idioma activo es Español, traducimos On-Device con Google ML Kit
+                        // SUSPENSIÓN #2: Traducción asíncrona On-Device con Google ML Kit
                         val finalPrediction = if (currentLanguage == "es") {
                             TranslationManager.translateEnToEs(rawPrediction)
                         } else {
                             rawPrediction
                         }
 
-                        // Mostramos la predicción traducida en vivo
+                        // Retorno al hilo principal: Se actualizan las vistas de la UI con los resultados
                         tvDetailText.text = finalPrediction
                         tvApiStatus.text = "🟢 ${getString(R.string.status_api_updated)} ($apiDate)"
                     } else {
@@ -180,6 +185,7 @@ class DetailActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 tvApiStatus.text = "⚪ ${getString(R.string.status_api_offline)}"
             } finally {
+                // Oculta el ProgressBar de carga y muestra la etiqueta de estado
                 progressBar.visibility = View.GONE
                 tvApiStatus.visibility = View.VISIBLE
             }

@@ -1,6 +1,6 @@
-# Guía de Conexión a API REST con Retrofit, Gson y Traducción On-Device con Google ML Kit
+# Guía de Conexión a API REST con Retrofit, Gson, Corrutinas y Google ML Kit
 
-Esta guía explica paso a paso cómo conectar una aplicación Android a una API REST externa (**freehoroscopeapi.com**), deserializar respuestas JSON, traducir dinámicamente el contenido en el dispositivo con Google ML Kit y validar la frescura de los datos comparando fechas.
+Esta guía explica paso a paso cómo conectar una aplicación Android a una API REST externa (**freehoroscopeapi.com**), deserializar respuestas JSON, ejecutar llamadas asíncronas con Corrutinas de Kotlin, traducir dinámicamente en el dispositivo con Google ML Kit y alternar entre periodos (Diario, Semanal, Mensual).
 
 ---
 
@@ -69,12 +69,17 @@ Definimos los endpoints y parámetros mediante anotaciones de Retrofit:
 ```kotlin
 interface HoroscopeApiService {
 
-    // Realiza un GET a: https://freehoroscopeapi.com/api/v1/get-horoscope/daily?sign=aries
     @Headers("Accept: application/json")
     @GET("api/v1/get-horoscope/daily")
-    suspend fun getDailyHoroscope(
-        @Query("sign") sign: String
-    ): Response<HoroscopeResponse>
+    suspend fun getDailyHoroscope(@Query("sign") sign: String): Response<HoroscopeResponse>
+
+    @Headers("Accept: application/json")
+    @GET("api/v1/get-horoscope/weekly")
+    suspend fun getWeeklyHoroscope(@Query("sign") sign: String): Response<HoroscopeResponse>
+
+    @Headers("Accept: application/json")
+    @GET("api/v1/get-horoscope/monthly")
+    suspend fun getMonthlyHoroscope(@Query("sign") sign: String): Response<HoroscopeResponse>
 }
 ```
 
@@ -103,27 +108,27 @@ object RetrofitClient {
 
 ### Paso 5: Consultar la API, Traducir en el Dispositivo y Validar la Fecha (`DetailActivity.kt`)
 
-Ejecutamos la petición dentro de una corrutina, traducimos al español con Google ML Kit si el idioma activo es Español y comparamos la fecha del dispositivo con la devuelta por la API:
+Ejecutamos la petición dentro de una corrutina, traducimos al español con Google ML Kit si el idioma activo es Español y mostramos el periodo seleccionado:
 
 ```kotlin
-private fun fetchHoroscopeFromApi(horoscope: Horoscope) {
+private fun fetchHoroscopeFromApi(horoscope: Horoscope, period: HoroscopePeriod = HoroscopePeriod.DAILY) {
     progressBar.visibility = View.VISIBLE
 
-    // Iniciar corrutina asíncrona en el ciclo de vida de la Activity
+    // Iniciar corrutina asíncrona segura vinculada al ciclo de vida de la Activity
     lifecycleScope.launch {
         try {
-            val response = RetrofitClient.apiService.getDailyHoroscope(horoscope.id)
+            val response = when (period) {
+                HoroscopePeriod.DAILY -> RetrofitClient.apiService.getDailyHoroscope(horoscope.id)
+                HoroscopePeriod.WEEKLY -> RetrofitClient.apiService.getWeeklyHoroscope(horoscope.id)
+                HoroscopePeriod.MONTHLY -> RetrofitClient.apiService.getMonthlyHoroscope(horoscope.id)
+            }
 
             if (response.isSuccessful && response.body()?.data != null) {
                 val apiData = response.body()!!.data!!
                 val apiDate = apiData.date.orEmpty()
                 val rawPrediction = apiData.horoscope.orEmpty()
 
-                // Obtener fecha actual del dispositivo (ej. "2026-10-09")
-                val currentDate = DateUtils.getCurrentFormattedDate("yyyy-MM-dd")
-
-                // Validación de frescura: Comparamos fechas
-                if (apiDate == currentDate && rawPrediction.isNotEmpty()) {
+                if (rawPrediction.isNotEmpty()) {
                     val currentLocales = AppCompatDelegate.getApplicationLocales()
                     val currentLanguage = if (currentLocales.isEmpty) {
                         resources.configuration.locales[0]?.language ?: "en"
@@ -164,31 +169,38 @@ Dado que la API `freehoroscopeapi.com` devuelve la predicción **únicamente en 
 2. **Funcionamiento Local**: Tras descargar el modelo de lenguaje ligero la primera vez, traduce localmente en el procesador del teléfono.
 3. **Soporte Offline**: Una vez descargado el modelo, funciona incluso sin conexión a internet.
 
-### Implementación ([TranslationManager.kt](file:///Users/Mananas/Develops/horoscopo/app/src/main/java/com/juanmatoro/horoscopoandroid/utils/TranslationManager.kt))
+---
 
-```kotlin
-object TranslationManager {
+## 4. Cómo Funcionan las Corrutinas de Kotlin en el Proyecto
 
-    suspend fun translateEnToEs(text: String): String {
-        return try {
-            val options = TranslatorOptions.Builder()
-                .setSourceLanguage(TranslateLanguage.ENGLISH)
-                .setTargetLanguage(TranslateLanguage.SPANISH)
-                .build()
+Las **Corrutinas de Kotlin** son la solución oficial recomendada por Google para gestionar tareas asíncronas y de red en Android.
 
-            val translator = Translation.getClient(options)
+### Conceptos Clave de Corrutinas Utilizados:
 
-            // Descarga automática del modelo de idioma la primera vez
-            translator.downloadModelIfNeeded().await()
+1. **`suspend fun` (Funciones de Suspensión)**:
+   - Una función marcada con `suspend` le indica al compilador que la tarea puede pausarse temporalmente en un hilo secundario (ej. E/S de red) y reanudarse cuando termine, **sin bloquear jamás el hilo de la interfaz de usuario (*UI Thread*)**.
+   - Ejemplo en [HoroscopeApiService.kt](file:///Users/Mananas/Develops/horoscopo/app/src/main/java/com/juanmatoro/horoscopoandroid/data/api/HoroscopeApiService.kt):
+     ```kotlin
+     suspend fun getDailyHoroscope(@Query("sign") sign: String): Response<HoroscopeResponse>
+     ```
 
-            // Traduce el texto localmente en el dispositivo
-            translator.translate(text).await()
-        } catch (e: Exception) {
-            text // Si falla, devuelve el texto original en inglés
-        }
-    }
-}
-```
+2. **`lifecycleScope.launch` (Ámbito Seguro del Ciclo de Vida)**:
+   - Es el "lanzador" de corrutinas integrado en las Activities de Android.
+   - Garantiza la **cancelación automática**: Si el usuario cierra `DetailActivity` antes de que la red responda, la corrutina se cancela al instante para evitar consumir batería o provocar fugas de memoria (*Memory Leaks*).
+   - Ejemplo en [DetailActivity.kt](file:///Users/Mananas/Develops/horoscopo/app/src/main/java/com/juanmatoro/horoscopoandroid/activities/DetailActivity.kt):
+     ```kotlin
+     lifecycleScope.launch {
+         // Código asíncrono no bloqueante
+     }
+     ```
+
+3. **`.await()` (Integración de Tasks de Google con Corrutinas)**:
+   - La librería `kotlinx.coroutines.play.services` provee la función de extensión `.await()`, la cual transforma las promesas/tareas asíncronas de Google ML Kit en funciones de suspensión compatibles con Corrutinas de Kotlin.
+   - Ejemplo en [TranslationManager.kt](file:///Users/Mananas/Develops/horoscopo/app/src/main/java/com/juanmatoro/horoscopoandroid/utils/TranslationManager.kt):
+     ```kotlin
+     translator.downloadModelIfNeeded().await() // Suspende hasta completar la descarga
+     translator.translate(text).await()         // Suspende hasta completar la traducción
+     ```
 
 ---
 
@@ -201,17 +213,17 @@ object TranslationManager {
 [ Muestra datos locales guardados como respaldo ]
               │
               ▼
-[ Muestra ProgressBar de carga ]
+[ Muestra ProgressBar y Selector (Diario, Semanal, Mensual) ]
               │
               ▼
-[ Petición de red asíncrona: GET /api/v1/get-horoscope/daily?sign=aries ]
+[ Petición de red asíncrona mediante Corrutina: GET /api/v1/get-horoscope/* ]
               │
               ├──────────────────────────────────┐
               ▼                                  ▼
 [ Respuesta exitosa HTTP 200 ]          [ Error de red / Sin internet ]
               │                                  │
               ▼                                  ▼
-[ ¿Fecha API == Fecha Dispositivo? ]    [ Oculta ProgressBar y muestra ]
+[ ¿Fecha API válida? ]                  [ Oculta ProgressBar y muestra ]
       │                   │             [ aviso de modo fuera de línea ]
       │ Sí                │ No
       ▼                   ▼

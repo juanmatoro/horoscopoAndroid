@@ -96,70 +96,16 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Selector de periodo (Diario, Semanal, Mensual) con botones de alto contraste -->
-    <com.google.android.material.button.MaterialButtonToggleGroup
-        android:id="@+id/toggleButtonPeriod"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        app:checkedButton="@id/btnPeriodDaily"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardHeader"
-        app:selectionRequired="true"
-        app:singleSelection="true">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPeriodDaily"
-            style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/period_daily"
-            android:textColor="@color/toggle_button_text"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:backgroundTint="@color/toggle_button_background"
-            app:strokeColor="@color/toggle_button_stroke"
-            app:strokeWidth="1.5dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPeriodWeekly"
-            style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/period_weekly"
-            android:textColor="@color/toggle_button_text"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:backgroundTint="@color/toggle_button_background"
-            app:strokeColor="@color/toggle_button_stroke"
-            app:strokeWidth="1.5dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPeriodMonthly"
-            style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/period_monthly"
-            android:textColor="@color/toggle_button_text"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:backgroundTint="@color/toggle_button_background"
-            app:strokeColor="@color/toggle_button_stroke"
-            app:strokeWidth="1.5dp" />
-
-    </com.google.android.material.button.MaterialButtonToggleGroup>
-
     <!-- Indicador de progreso durante la consulta a la API REST de horóscopos -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="12dp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toggleButtonPeriod" />
+        app:layout_constraintTop_toBottomOf="@id/cardHeader" />
 
     <!-- Etiqueta de estado que indica la verificación de fecha entre el dispositivo y la API -->
     <TextView
@@ -186,7 +132,7 @@
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:paddingBottom="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationViewPeriod"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvApiStatus">
@@ -199,5 +145,19 @@
             android:textColor="@android:color/black"
             android:textSize="18sp" />
     </androidx.core.widget.NestedScrollView>
+
+    <!-- Barra de navegación inferior (BottomNavigationView) para seleccionar el periodo (Diario, Semanal, Mensual) -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigationViewPeriod"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        app:elevation="8dp"
+        app:itemIconTint="@color/toggle_button_text"
+        app:itemTextColor="@color/toggle_button_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/detail_period_bottom_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

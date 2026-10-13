@@ -6,12 +6,17 @@ import retrofit2.http.Headers
 import retrofit2.http.Query
 
 /**
- * Interfaz de Retrofit que define las peticiones HTTP REST a la API de freehoroscopeapi.com.
+ * Interfaz de Retrofit que define las peticiones HTTP REST asíncronas a la API de freehoroscopeapi.com.
+ *
+ * USO DE CORRUTINAS DE KOTLIN:
+ * Cada función está marcada con la palabra clave 'suspend' (función de suspensión).
+ * Esto permite a Retrofit ejecutar la llamada de red en un hilo secundario (IO Thread)
+ * de forma asíncrona y no bloqueante, suspendiendo la ejecución sin congelar la interfaz de usuario (UI Thread).
  */
 interface HoroscopeApiService {
 
     /**
-     * Petición HTTP GET para consultar el horóscopo diario de un signo del zodíaco.
+     * Petición HTTP GET asíncrona mediante Corrutina para consultar el horóscopo diario de un signo.
      *
      * @param sign ID/Nombre del signo en inglés (ej. "aries", "taurus", "virgo").
      * @return [Response] envolviendo la respuesta [HoroscopeResponse].
@@ -23,7 +28,7 @@ interface HoroscopeApiService {
     ): Response<HoroscopeResponse>
 
     /**
-     * Petición HTTP GET para consultar el horóscopo semanal de un signo del zodíaco.
+     * Petición HTTP GET asíncrona mediante Corrutina para consultar el horóscopo semanal de un signo.
      *
      * @param sign ID/Nombre del signo en inglés (ej. "aries", "taurus", "virgo").
      * @return [Response] envolviendo la respuesta [HoroscopeResponse].
@@ -35,7 +40,7 @@ interface HoroscopeApiService {
     ): Response<HoroscopeResponse>
 
     /**
-     * Petición HTTP GET para consultar el horóscopo mensual de un signo del zodíaco.
+     * Petición HTTP GET asíncrona mediante Corrutina para consultar el horóscopo mensual de un signo.
      *
      * @param sign ID/Nombre del signo en inglés (ej. "aries", "taurus", "virgo").
      * @return [Response] envolviendo la respuesta [HoroscopeResponse].
